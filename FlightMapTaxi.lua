@@ -87,7 +87,7 @@ function FlightMapTaxiFrame_OnEvent(event)
         -- Turn the continent select off
         FlightMapTaxiContinents:Hide();
         -- Check option is on
-        if not FlightMap.Opts.fullTaxiMap then return; end
+        if not FlightMapChar.Opts.fullTaxiMap then return; end
         thiscont = FlightMapUtil.getContinent();
     end
 
@@ -128,7 +128,7 @@ function FlightMapTaxiFrame_OnEvent(event)
     for key, node in map do
         -- If it's on this continent, and hasn't been drawn, fill it in
         if not shownNodes[key] and node.Continent == thiscont
-        and (FlightMap.Opts.showAllInfo or FlightMapUtil.knownNode(key)) then
+        and (FlightMapChar.Opts.showAllInfo or FlightMapUtil.knownNode(key)) then
             local button = getglobal("FlightMapTaxiButton" .. nodenum);
             if button then
                 nodenum = nodenum + 1;
@@ -157,7 +157,7 @@ function FlightMapTaxiFrame_OnEvent(event)
                 linenum = linenum + 1;
                 seen[key .. "-" .. k] = true;
                 seen[k .. "-" .. key] = true;
-                if FlightMap.Opts.showAllInfo
+                if FlightMapChar.Opts.showAllInfo
                 or (FlightMapUtil.knownNode(k)
                 and FlightMapUtil.knownNode(key)) then
                     FlightMapUtil.drawLine(TaxiMap, tex,

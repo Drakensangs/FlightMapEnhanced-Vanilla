@@ -8,7 +8,7 @@
 -- for any damage that may arise from the use of this AddOn.
 
 -- Version number
-FLIGHTMAP_VERSION   = "1.12-1";
+FLIGHTMAP_VERSION   = "1.13";
 
 -- Maximum lines to draw at once
 FLIGHTMAP_MAX_PATHS = 15;
@@ -117,75 +117,164 @@ local lPathFrameCache = {};
 
 ------------------ Data access functions ------------------
 
-local function lStripPoint(map, point)
-    for k, v in map do
-        if v.Costs then 
-            v.Costs[point] = nil; 
-        end
-        if v.Flights then 
-            v.Flights[point] = nil; 
-        end
+local function lStripPoint(factionSV, point)
+    if not factionSV then return; end
+    for k, v in pairs(factionSV) do
+        if v.Costs   then v.Costs[point]   = nil; end
+        if v.Flights then v.Flights[point] = nil; end
     end
-    for k, v in FlightMap.Knowledge do
-        v[point] = nil;
-    end
-    map[point] = nil;
+    factionSV[point] = nil;
 end
 
--- Default option settings
-FLIGHTMAP_DEFAULT_OPTS = {
+-- Default option settings (also declared in Defaults.lua; this copy
+-- is used as a fallback if Defaults.lua hasn't set them yet)
+FLIGHTMAP_DEFAULT_OPTS = FLIGHTMAP_DEFAULT_OPTS or {
     showPaths = true,
     showPOIs = true,
+    showAllInfo = false,
     showCosts = true,
     showTimes = true,
     showDestinations = true,
-    showAllInfo = false,
     showMultiHop = true,
-    lockFlightTimes = false,
+    showZoneTooltip = true,
+    showContinentPOIs = true,
     autoDismount = true,
-    fontSize = 12,
+    showPOITooltips = true,
     showLevelRanges = true,
+    notifyTaskbar = true,
+    notifySound = false,
+    fontSize = 12,
+    timerPos = { point = "TOP", x = 0, y = -11 },
+    lockFlightTimes = false,
 };
 
+-- Strip saved overrides that are identical to (or within 1s of) the
+-- built-in defaults, so only genuine differences occupy SavedVariables.
+local function lStripDefaults(factionSV, defaults)
+    if not factionSV then return; end
+    for nodeKey, savedNode in pairs(factionSV) do
+        local def = defaults[nodeKey];
+        if def then
+            -- Strip scalar fields matching the default
+            for _, field in ipairs({"Name", "Zone", "Continent"}) do
+                if savedNode[field] == def[field] then
+                    savedNode[field] = nil;
+                end
+            end
+            -- Strip Location if it matches within tolerance
+            if savedNode.Location and def.Location then
+                local allMatch = true;
+                for _, space in ipairs({"Taxi", "Continent", "Zone"}) do
+                    local sv = savedNode.Location[space];
+                    local df = def.Location[space];
+                    if sv and df then
+                        if math.abs(sv.x - df.x) > 0.005
+                        or math.abs(sv.y - df.y) > 0.005 then
+                            allMatch = false; break;
+                        end
+                    end
+                end
+                if allMatch then savedNode.Location = nil; end
+            end
+            -- Strip flight times within 1 second of default
+            if savedNode.Flights and def.Flights then
+                for dest, svTime in pairs(savedNode.Flights) do
+                    local dfTime = def.Flights[dest];
+                    if dfTime and math.abs(svTime - dfTime) < 1.0 then
+                        savedNode.Flights[dest] = nil;
+                    end
+                end
+                if not next(savedNode.Flights) then
+                    savedNode.Flights = nil;
+                end
+            end
+            -- Strip costs matching default exactly
+            if savedNode.Costs and def.Costs then
+                for dest, svCost in pairs(savedNode.Costs) do
+                    if def.Costs[dest] == svCost then
+                        savedNode.Costs[dest] = nil;
+                    end
+                end
+                if not next(savedNode.Costs) then
+                    savedNode.Costs = nil;
+                end
+            end
+            -- If nothing meaningful remains, drop the whole node
+            local hasData = false;
+            for _ in pairs(savedNode) do hasData = true; break; end
+            if not hasData then factionSV[nodeKey] = nil; end
+        end
+    end
+end
+
 local function lSetDefaultData()
-    -- Create an empty knowledge record
-    if not FlightMap["Knowledge"] then
-        FlightMap.Knowledge = {};
+    -- Ensure per-character saved variable table exists
+    if not FlightMapChar then FlightMapChar = {}; end
+
+    -- Per-character flight knowledge
+    if not FlightMapChar.Knowledge then
+        FlightMapChar.Knowledge = {};
     end
 
-    -- Default option settings
-    if (not FlightMap["Opts"]) then
-        FlightMap["Opts"] = FLIGHTMAP_DEFAULT_OPTS;
-    end
-
-    -- Any options that don't have a value at all should be defaulted
-    for k, v in pairs(FLIGHTMAP_DEFAULT_OPTS) do
-        if FlightMap.Opts[k] == nil then
-            FlightMap.Opts[k] = v;
+    -- Per-character option settings
+    if not FlightMapChar.Opts then
+        FlightMapChar.Opts = {};
+        for k, v in pairs(FLIGHTMAP_DEFAULT_OPTS) do
+            FlightMapChar.Opts[k] = v;
+        end
+    else
+        -- Fill in any newly added options
+        for k, v in pairs(FLIGHTMAP_DEFAULT_OPTS) do
+            if FlightMapChar.Opts[k] == nil then
+                FlightMapChar.Opts[k] = v;
+            end
         end
     end
 
-    -- Patch 1.8: Remove any references to Valor's Rest
-    lStripPoint(FlightMap[FLIGHTMAP_HORDE] or {}, "1:461:226");
-    lStripPoint(FlightMap[FLIGHTMAP_ALLIANCE] or {}, "1:463:223");
+    if FlightMap.Knowledge then
+        for charKey, nodes in pairs(FlightMap.Knowledge) do
+            if not FlightMapChar.Knowledge[charKey] then
+                FlightMapChar.Knowledge[charKey] = nodes;
+            end
+        end
+        FlightMap.Knowledge = nil;
+    end
+    if FlightMap.Opts then
+        if not FlightMapChar.Opts then
+            FlightMapChar.Opts = FlightMap.Opts;
+        end
+        FlightMap.Opts = nil;
+    end
 
-    -- Patch 1.12: Remove any references to Alliance's misplaced Moonglade
-    lStripPoint(FlightMap[FLIGHTMAP_ALLIANCE] or {}, "1:552:793");
+    -- Remove stale patch data
+    lStripPoint(FlightMap[FLIGHTMAP_HORDE],    "1:461:226");  -- Valor's Rest (Horde)
+    lStripPoint(FlightMap[FLIGHTMAP_ALLIANCE], "1:463:223");  -- Valor's Rest (Alliance)
+    lStripPoint(FlightMap[FLIGHTMAP_ALLIANCE], "1:552:793");  -- Misplaced Moonglade
 
-    -- Revision 1.8-2: Delete pre-1.7 data
-    FlightMap.Locs = nil;
+    -- Strip redundant saved data that matches built-in defaults
+    lStripDefaults(FlightMap[FLIGHTMAP_HORDE],    FLIGHTMAP_HORDE_FLIGHTS);
+    lStripDefaults(FlightMap[FLIGHTMAP_ALLIANCE], FLIGHTMAP_ALLIANCE_FLIGHTS);
+
+    -- Rebuild the session map now that overrides are clean
+    FlightMapUtil.resetFlightMapCache();
+
+    -- Clean up very old format fields
+    FlightMap.Locs  = nil;
     FlightMap.Times = nil;
 end
 
--- Learn about the currently open taxi map
+-- Learn about the currently open taxi map.
+-- Only writes to SavedVariables when a value differs from the built-in default.
 local function lLearnTaxiNode()
-    local map = FlightMapUtil.getFlightMap();
+    local map     = FlightMapUtil.getFlightMap();
+    local faction = UnitFactionGroup("player");
+    local sv      = FlightMapUtil.lGetOverrides(faction);
+    local defaults = (faction == FLIGHTMAP_ALLIANCE)
+                     and FLIGHTMAP_ALLIANCE_FLIGHTS
+                     or  FLIGHTMAP_HORDE_FLIGHTS;
 
-    local oldCont, oldZone = GetCurrentMapContinent(),
-                             GetCurrentMapZone();
-
+    local oldCont, oldZone = GetCurrentMapContinent(), GetCurrentMapZone();
     SetMapToCurrentZone();
-
     local thisCont = GetCurrentMapContinent();
 
     local thisNode;
@@ -193,107 +282,164 @@ local function lLearnTaxiNode()
     local numNodes = NumTaxiNodes();
     for index = 1, numNodes, 1 do
         local tType = TaxiNodeGetType(index);
-        if (tType == "CURRENT") then
+        if tType == "CURRENT" then
             thisNode = index;
-        elseif (tType == "REACHABLE") then
-            local mx, my = TaxiNodePosition(index);
+        elseif tType == "REACHABLE" then
+            local mx, my   = TaxiNodePosition(index);
             local destName = FlightMapUtil.makeNodeName(thisCont, mx, my);
 
             destinations[destName] = index;
-
             FlightMapUtil.knownNode(destName, true);
 
+            -- New node not in default database — save it fully
             if not map[destName] then
-                map[destName] = {
-                    Name      = "Fix me",
-                    Zone      = "Unknown!",
-                    Continent = -1,
+                local stub = {
+                    Name      = TaxiNodeName(index),
+                    Zone      = "Unknown",
+                    Continent = thisCont,
                     Flights   = {},
                     Costs     = {},
-                    Routes    = {},
                     Location  = {
                         Taxi      = { x = mx, y = my },
-                        Zone      = { x = 0, y = 0 },
-                        Continent = { x = 0, y = 0 },
+                        Zone      = { x = 0,  y = 0  },
+                        Continent = { x = 0,  y = 0  },
                     },
                 };
-            end
-
-            if map[destName] then
-                map[destName].Name = TaxiNodeName(index);
+                map[destName] = stub;
+                sv[destName]  = stub;
+            else
+                -- Update in-session name; only persist if differs from default
+                local taxiName = TaxiNodeName(index);
+                map[destName].Name = taxiName;
+                local df = defaults[destName];
+                if not df or df.Name ~= taxiName then
+                    if not sv[destName] then sv[destName] = {}; end
+                    sv[destName].Name = taxiName;
+                end
             end
         end
     end
 
-    if (thisNode) then
-        local mx, my = TaxiNodePosition(thisNode);
+    if thisNode then
+        local mx, my   = TaxiNodePosition(thisNode);
         local thisName = FlightMapUtil.makeNodeName(thisCont, mx, my);
         local zoneName = FlightMapUtil.getZoneName();
-        local zx, zy = GetPlayerMapPosition("player");
+        local zx, zy   = GetPlayerMapPosition("player");
         SetMapZoom(thisCont, nil);
-        local cx, cy = GetPlayerMapPosition("player");
+        local cx, cy   = GetPlayerMapPosition("player");
 
         FlightMapUtil.knownNode(thisName, true);
 
-        if not map[thisName] then
-            map[thisName] = {};
-        end
-        if not map[thisName].Flights then
-            map[thisName].Flights = {};
-        end
-        if not map[thisName].Costs then
-            map[thisName].Costs = {};
-        end
-        if not map[thisName].Routes then
-            map[thisName].Routes = {};
+        -- Ensure session map node exists with all sub-tables
+        if not map[thisName] then map[thisName] = {}; end
+        if not map[thisName].Flights then map[thisName].Flights = {}; end
+        if not map[thisName].Costs   then map[thisName].Costs   = {}; end
+        if not map[thisName].Routes  then map[thisName].Routes  = {}; end
+
+        local df = defaults[thisName];
+
+        -- Helper: write a scalar field to session + override only when changed
+        local function saveField(field, val)
+            map[thisName][field] = val;
+            if not df or df[field] ~= val then
+                if not sv[thisName] then sv[thisName] = {}; end
+                sv[thisName][field] = val;
+            end
         end
 
-        map[thisName].Name = TaxiNodeName(thisNode);
-        map[thisName].Zone = zoneName;
-        map[thisName].Continent = thisCont;
-        map[thisName].Location = {
-            Zone = { x = zx, y = zy },
+        saveField("Name",      TaxiNodeName(thisNode));
+        saveField("Zone",      zoneName);
+        saveField("Continent", thisCont);
+
+        -- Location: save only when it meaningfully differs from default
+        local newLoc = {
+            Zone      = { x = zx, y = zy },
             Continent = { x = cx, y = cy },
-            Taxi = { x = mx, y = my },
+            Taxi      = { x = mx, y = my },
         };
+        map[thisName].Location = newLoc;
+        local dfLoc = df and df.Location;
+        local function coordClose(a, b) return math.abs(a - b) < 0.005; end
+        local locMatchesDefault = dfLoc
+            and dfLoc.Zone      and coordClose(dfLoc.Zone.x,      zx)
+                                and coordClose(dfLoc.Zone.y,      zy)
+            and dfLoc.Continent and coordClose(dfLoc.Continent.x, cx)
+                                and coordClose(dfLoc.Continent.y, cy)
+            and dfLoc.Taxi      and coordClose(dfLoc.Taxi.x,      mx)
+                                and coordClose(dfLoc.Taxi.y,      my);
+        if not locMatchesDefault then
+            if not sv[thisName] then sv[thisName] = {}; end
+            sv[thisName].Location = newLoc;
+        end
 
-        for k,v in pairs(destinations) do
-            map[thisName].Costs[k] = TaxiNodeCost(v);
+        -- Destinations: costs and routes
+        for k, v in pairs(destinations) do
+            local newCost = TaxiNodeCost(v);
+            map[thisName].Costs[k] = newCost;
+
+            -- Persist cost only when it differs from default
+            local dfCost = df and df.Costs and df.Costs[k];
+            if dfCost ~= newCost then
+                if not sv[thisName]       then sv[thisName]       = {}; end
+                if not sv[thisName].Costs then sv[thisName].Costs = {}; end
+                sv[thisName].Costs[k] = newCost;
+            end
 
             local routes = GetNumRoutes(v);
             if routes > 1 then
                 local totalTime = 0;
-                local prevSpot = thisName;
-                local newRoute = {};
+                local prevSpot  = thisName;
+                local newRoute  = {};
                 for r = 1, routes do
                     local dest = FlightMapUtil.makeNodeName(thisCont,
                             TaxiGetDestX(v, r), TaxiGetDestY(v, r));
                     table.insert(newRoute, dest);
-
                     if map[prevSpot] and map[prevSpot].Flights[dest]
-                        and map[prevSpot].Flights[dest] > 0
-                        and totalTime then
+                    and map[prevSpot].Flights[dest] > 0 and totalTime then
                         totalTime = totalTime + map[prevSpot].Flights[dest];
                     else
                         totalTime = nil;
                     end
-
                     prevSpot = dest;
                 end
 
                 local oldRoute = map[thisName].Routes[k];
                 local isNewRoute = not oldRoute
-                    or table.getn(oldRoute) ~= table.getn(newRoute)
-                    or table.foreachi(newRoute, function(idx)
-                        return newRoute[idx] ~= oldRoute[idx];
-                    end);
+                    or table.getn(oldRoute) ~= table.getn(newRoute);
+                if not isNewRoute then
+                    for idx = 1, table.getn(newRoute) do
+                        if newRoute[idx] ~= oldRoute[idx] then
+                            isNewRoute = true; break;
+                        end
+                    end
+                end
 
                 if isNewRoute or map[thisName].Flights[k] == 0 then
                     map[thisName].Flights[k] = totalTime;
-                    map[thisName].Routes[k] = newRoute;
+                    map[thisName].Routes[k]  = newRoute;
+
+                    -- Persist route only when it differs from default
+                    local dfRoute = df and df.Routes and df.Routes[k];
+                    local routeDiffers = not dfRoute
+                        or table.getn(dfRoute) ~= table.getn(newRoute);
+                    if not routeDiffers then
+                        for i = 1, table.getn(newRoute) do
+                            if newRoute[i] ~= dfRoute[i] then
+                                routeDiffers = true; break;
+                            end
+                        end
+                    end
+                    if routeDiffers then
+                        if not sv[thisName]        then sv[thisName]        = {}; end
+                        if not sv[thisName].Routes then sv[thisName].Routes = {}; end
+                        sv[thisName].Routes[k] = newRoute;
+                    end
                 end
             else
                 map[thisName].Routes[k] = nil;
+                if sv[thisName] and sv[thisName].Routes then
+                    sv[thisName].Routes[k] = nil;
+                end
             end
 
             if not map[thisName].Flights[k] then
@@ -319,7 +465,7 @@ local function lGetPlayerFaction()
 end
 
 local function lAutoDismount()
-    if not FlightMap.Opts.autoDismount then return; end
+    if not FlightMapChar.Opts.autoDismount then return; end
 
     for i = 0, 15, 1 do
         local id, isAura = GetPlayerBuff(i, "HELPFUL");
@@ -333,12 +479,12 @@ end
 
 local function lFormatExtra(cost, secs)
     local result = "";
-    if cost ~= nil and FlightMap.Opts.showCosts then
+    if cost ~= nil and FlightMapChar.Opts.showCosts then
         local dosh = FlightMapUtil.formatMoney(cost);
         if cost == 0 then dosh = FLIGHTMAP_NO_COST; end
         result = dosh;
     end
-    if secs ~= nil and FlightMap.Opts.showTimes then
+    if secs ~= nil and FlightMapChar.Opts.showTimes then
         local durn = FlightMapUtil.formatTime(secs);
         if result ~= "" then
             result = result .. " " .. durn;
@@ -390,18 +536,18 @@ local function lAddFlightsForNode(tooltip, node, prefix, source)
         end
     end
 
-    if not source and FlightMap.Opts.showDestinations then
+    if not source and FlightMapChar.Opts.showDestinations then
         for dest, secs in data.Flights do
             local islocal = (not data.Routes or not data.Routes[dest]);
             local destData = map[dest];
-            if destData and (islocal or FlightMap.Opts.showMultiHop) then
+            if destData and (islocal or FlightMapChar.Opts.showMultiHop) then
                 local name, _ = FlightMapUtil.getNameAndZone(destData.Name);
                 local cost = data.Costs[dest];
                 local extra = lFormatExtra(cost, secs);
                 if FlightMapUtil.knownNode(dest) then
                     tooltip:AddDoubleLine(prefix .. name, extra,
                         1, 1, 1, 1, 1, 1);
-                elseif FlightMap.Opts.showAllInfo then
+                elseif FlightMapChar.Opts.showAllInfo then
                     tooltip:AddDoubleLine(prefix .. name, extra,
                         0.7, 0.7, 0.7, 0.7, 0.7, 0.7);
                 end
@@ -416,6 +562,11 @@ FlightMapUtil.addFlightsForNode = lAddFlightsForNode;
 -- Update the flight tooltip for a zone
 local function lUpdateTooltip(zoneName)
     if not zoneName or zoneName == "" then
+        FlightMapTooltip:Hide();
+        return;
+    end
+
+    if not FlightMapChar.Opts.showZoneTooltip then
         FlightMapTooltip:Hide();
         return;
     end
@@ -442,7 +593,7 @@ local function lUpdateTooltip(zoneName)
     end
 
     FlightMapTooltip:SetText(zoneName, title.r, title.g, title.b);
-    if levels and FlightMap.Opts.showLevelRanges then
+    if levels and FlightMapChar.Opts.showLevelRanges then
         FlightMapTooltip:AddLine(levels, title.r, title.g, title.b);
     end
 
@@ -450,7 +601,7 @@ local function lUpdateTooltip(zoneName)
 
     local flights = 0;
     for node, data in nodes do
-        if FlightMapUtil.knownNode(node) or FlightMap.Opts.showAllInfo then
+        if FlightMapUtil.knownNode(node) or FlightMapChar.Opts.showAllInfo then
             flights = flights + lAddFlightsForNode(FlightMapTooltip, node, "");
         end
     end
@@ -461,7 +612,7 @@ local function lUpdateTooltip(zoneName)
     FlightMapTooltip:SetPoint("BOTTOMLEFT", "WorldMapDetailFrame",
             "BOTTOMLEFT", 0, 0);
 
-    if flights > 0 or (levels and FlightMap.Opts.showLevelRanges) then
+    if flights > 0 or (levels and FlightMapChar.Opts.showLevelRanges) then
         FlightMapTooltip:Show();
     else
         FlightMapTooltip:Hide();
@@ -515,7 +666,7 @@ local function lShowNodePOI(node, data, space, num)
     end
 
     if not FlightMapUtil.knownNode(node) then
-        if not FlightMap.Opts.showAllInfo then
+        if not FlightMapChar.Opts.showAllInfo then
             return false;
         end
         button:SetNormalTexture(FLIGHTMAP_POI_OTHER);
@@ -539,14 +690,14 @@ local function lUpdateFlightPOIs(zoneName)
     local mapZone = GetCurrentMapZone();
     local POI = 1;
 
-    if mapZone ~= 0 and FlightMap.Opts.showPOIs then
+    if mapZone ~= 0 and FlightMapChar.Opts.showPOIs then
         local nodes = FlightMapUtil.getNodesInZone(zoneName, false);
         for node, data in nodes do
             if lShowNodePOI(node, data, "Zone", POI) then
                 POI = POI + 1;
             end
         end
-    elseif continent ~= 0 and FlightMap.Opts.showPOIs then
+    elseif continent ~= 0 and FlightMapChar.Opts.showPOIs and FlightMapChar.Opts.showContinentPOIs then
         local map = FlightMapUtil.getFlightMap();
         for node, data in map do
             if data.Continent == continent then
@@ -594,13 +745,13 @@ end
 local function lDrawFlightLines(zoneName)
     local lineNum = 1;
 
-    if zoneName and FlightMap.Opts.showPaths then
+    if zoneName and FlightMapChar.Opts.showPaths then
         local nodes = FlightMapUtil.getNodesInZone(zoneName, true);
         for node, data in nodes do
-            if FlightMap.Opts.showAllInfo or FlightMapUtil.knownNode(node) then
+            if FlightMapChar.Opts.showAllInfo or FlightMapUtil.knownNode(node) then
                 for dest, duration in data.Flights do
                     if not (data.Routes and data.Routes[dest])
-                    and (FlightMap.Opts.showAllInfo
+                    and (FlightMapChar.Opts.showAllInfo
                     or FlightMapUtil.knownNode(dest)) then
                         if lDrawFlightLine(node, dest, lineNum) then
                             lineNum = lineNum + 1;
@@ -655,6 +806,7 @@ function FlightMap_WorldMapButton_OnUpdate(arg1)
 end
 
 function FlightMapPOIButton_OnEnter()
+    if not FlightMapChar.Opts.showPOITooltips then return; end
     local x, y = this:GetCenter();
     local parentX, parentY = WorldMapDetailFrame:GetCenter();
     if (x > parentX) then
@@ -670,15 +822,18 @@ end
 
 -- /flightmap handler
 function FlightMap_OnSlashCmd(args)
-    if args == FLIGHTMAP_RESET then 
+    if args == FLIGHTMAP_RESET then
+        local def = FLIGHTMAP_DEFAULT_OPTS.timerPos;
         FlightMapTimesFrame:ClearAllPoints();
-        FlightMapTimesFrame:SetPoint("TOP", PVPArenaTextString, "BOTTOM");
+        FlightMapTimesFrame:SetPoint(def.point, UIParent, def.point, def.x, def.y);
+        FlightMapTimesFrame:SetUserPlaced(false);
+        FlightMapChar.Opts.timerPos = { point = def.point, x = def.x, y = def.y };
     elseif args == FLIGHTMAP_SHOWMAP then
         FlightMapTaxi_ShowContinent();
     elseif args == FLIGHTMAP_LOCKTIMES then
-        FlightMap.Opts.lockFlightTimes = not FlightMap.Opts.lockFlightTimes;
+        FlightMapChar.Opts.lockFlightTimes = not FlightMapChar.Opts.lockFlightTimes;
         DEFAULT_CHAT_FRAME:AddMessage(
-            FLIGHTMAP_TIMESLOCKED[FlightMap.Opts.lockFlightTimes],
+            FLIGHTMAP_TIMESLOCKED[FlightMapChar.Opts.lockFlightTimes],
             1.0, 1.0, 1.0);
     elseif args == FLIGHTMAP_GETHELP then
         for cmd, desc in FLIGHTMAP_SUBCOMMANDS do
@@ -722,7 +877,14 @@ function FlightMap_OnEvent(event)
         lLearnTaxiNode();
     elseif (event == "VARIABLES_LOADED") then
         lSetDefaultData();
-		
+
+        -- Apply saved timer bar position
+        local pos = FlightMapChar.Opts.timerPos;
+        if pos and pos.point then
+            FlightMapTimesFrame:ClearAllPoints();
+            FlightMapTimesFrame:SetPoint(pos.point, UIParent, pos.point, pos.x, pos.y);
+        end
+
 		FlightMap_UpdateTooltipFont();
 
         if (myAddOnsFrame_Register) then
@@ -741,6 +903,14 @@ end
 ----------------- Options panel functions -----------------
 
 function FlightMapOptionsFrame_OnShow()
+    if not FlightMapChar then FlightMapChar = {}; end
+    if not FlightMapChar.Opts then
+        FlightMapChar.Opts = {};
+        for k, v in pairs(FLIGHTMAP_DEFAULT_OPTS) do
+            FlightMapChar.Opts[k] = v;
+        end
+    end
+
     FlightMapOptionsFrameClose:SetText(FLIGHTMAP_OPTIONS_CLOSE);
     FlightMapOptionsFrameTitle:SetText(FLIGHTMAP_OPTIONS_TITLE);
 
@@ -749,21 +919,22 @@ function FlightMapOptionsFrame_OnShow()
         local name = base .. "Opt" .. optid;
         local button = getglobal(name);
         local label = getglobal(name .. "Text");
-        OptionsFrame_EnableCheckBox(button, 1, FlightMap.Opts[option.option]);
-
-        label:SetText(option.label);
-        button.tooltipText = option.tooltip;
-        button.option = option.option;
-        button.children = option.children or {};
+        if button and label then
+            OptionsFrame_EnableCheckBox(button, 1, FlightMapChar.Opts[option.option]);
+            label:SetText(option.label);
+            button.tooltipText = option.tooltip;
+            button.option = option.option;
+            button.children = option.children or {};
+        end
     end
 
     for optid, option in pairs(FLIGHTMAP_OPTIONS or {}) do
-        for _, child in option.children or {} do
+        for _, child in pairs(option.children or {}) do
             local other = getglobal(base .. "Opt" .. child);
             if other then
-                if FlightMap.Opts[option.option] then
+                if FlightMapChar.Opts[option.option] then
                     OptionsFrame_EnableCheckBox(other, 1,
-                        FlightMap.Opts[FLIGHTMAP_OPTIONS[child].option]);
+                        FlightMapChar.Opts[FLIGHTMAP_OPTIONS[child].option]);
                 else
                     OptionsFrame_DisableCheckBox(other);
                 end
@@ -771,37 +942,35 @@ function FlightMapOptionsFrame_OnShow()
         end
     end
 
-    if not FlightMapLevelRangesCheckButton then
-        local button = CreateFrame("CheckButton", "FlightMapLevelRangesCheckButton", FlightMapOptionsFrame, "OptionsCheckButtonTemplate");
-        button:SetPoint("TOPLEFT", FlightMapOptionsFrameClose, "BOTTOMLEFT", 35, 109);
-        button:SetChecked(FlightMap.Opts.showLevelRanges);
-        button.option = "showLevelRanges";
-        button.children = {};
-        button:SetScript("OnClick", FlightMapOptionsCheckButton_OnClick);
-        
-        local label = button:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall");
-        label:SetPoint("LEFT", button, "RIGHT", 2, 0);
-        label:SetText("Show Level Ranges");
-        button.tooltipText = "Display the recommended level range for each zone";
-        
-        button:SetScript("OnEnter", function()
-            if (button.tooltipText) then
-                GameTooltip:SetOwner(button, "ANCHOR_RIGHT");
-                GameTooltip:AddLine(button.tooltipText, 1, 1, 1);
-                GameTooltip:Show();
-            end
-        end);
-        
-        button:SetScript("OnLeave", function()
-            GameTooltip:Hide();
-        end);
-    else
-        FlightMapLevelRangesCheckButton:SetChecked(FlightMap.Opts.showLevelRanges);
+    local unitXPLoaded = IsAddOnLoaded and IsAddOnLoaded("UnitXP_SP3_Addon") and UnitXP;
+    local opt16 = getglobal(base .. "Opt16");
+    local opt17 = getglobal(base .. "Opt17");
+    if opt16 then
+        if unitXPLoaded then
+            OptionsFrame_EnableCheckBox(opt16, 1, FlightMapChar.Opts.notifyTaskbar);
+        else
+            OptionsFrame_DisableCheckBox(opt16);
+        end
     end
+    if opt17 then
+        if unitXPLoaded then
+            OptionsFrame_EnableCheckBox(opt17, 1, FlightMapChar.Opts.notifySound);
+        else
+            OptionsFrame_DisableCheckBox(opt17);
+        end
+    end
+
+    if not FlightMapUnitXPSeparator then
+        FlightMapUnitXPSeparator = FlightMapOptionsFrame:CreateFontString(
+            "FlightMapUnitXPSeparator", "ARTWORK", "GameFontNormalSmall");
+        FlightMapUnitXPSeparator:SetPoint("TOPLEFT", FlightMapOptionsFrame, "TOPLEFT", 220, -210);
+        FlightMapUnitXPSeparator:SetText("UnitXP SP3:");
+    end
+    FlightMapUnitXPSeparator:Show();
 
     if not FlightMapFontSizeSlider then
         CreateFrame("Slider", "FlightMapFontSizeSlider", FlightMapOptionsFrame, "OptionsSliderTemplate");
-        FlightMapFontSizeSlider:SetWidth(220);
+        FlightMapFontSizeSlider:SetWidth(280);
         FlightMapFontSizeSlider:SetHeight(16);
         FlightMapFontSizeSlider:SetOrientation("HORIZONTAL");
         FlightMapFontSizeSlider:SetPoint("TOP", FlightMapOptionsFrameClose, "BOTTOM", 0, 55);
@@ -810,19 +979,17 @@ function FlightMapOptionsFrame_OnShow()
         FlightMapFontSizeSlider:SetValueStep(1);
 
         local txt = getglobal("FlightMapFontSizeSliderText");
-        if txt then txt:SetText("Tooltip Font Size"); end
+        if txt then txt:SetText((FLIGHTMAP_TOOLTIP_FONT_SIZE or "Tooltip font size") .. ": " .. (FlightMapChar.Opts.fontSize or 12)); end
         local low = getglobal("FlightMapFontSizeSliderLow");
         local high = getglobal("FlightMapFontSizeSliderHigh");
 		if low then low:SetText("8"); end
 		if high then high:SetText("20"); end
 
-        FlightMapFontSizeSlider.tooltipText = "Adjusts the font size of the FlightMap tooltip text.";
+        FlightMapFontSizeSlider.tooltipText = FLIGHTMAP_TOOLTIP_FONT_SIZE_TIP or "Adjusts the font size of the FlightMap tooltip text.";
         
         FlightMapFontSizeSlider:SetScript("OnEnter", function()
             if FlightMapFontSizeSlider.tooltipText then
-                GameTooltip:SetOwner(FlightMapFontSizeSlider, "ANCHOR_RIGHT");
-                GameTooltip:AddLine(FlightMapFontSizeSlider.tooltipText, 1, 1, 1);
-                GameTooltip:Show();
+                GameTooltip_AddNewbieTip(FlightMapFontSizeSlider.tooltipText, 1, 1, 1);
             end
         end);
         
@@ -849,10 +1016,13 @@ function FlightMapOptionsFrame_OnShow()
 			local val = tonumber(value) or frame:GetValue() or 12;
 			val = math.floor(val +0.5);
 			
-			if not FlightMap then FlightMap = {}; end
-			if not FlightMap.Opts then FlightMap.Opts = {}; end
-			FlightMap.Opts.fontSize = val;
-			
+			if not FlightMapChar then FlightMapChar = {}; end
+			if not FlightMapChar.Opts then FlightMapChar.Opts = {}; end
+			FlightMapChar.Opts.fontSize = val;
+
+			local txt = getglobal("FlightMapFontSizeSliderText");
+			if txt then txt:SetText((FLIGHTMAP_TOOLTIP_FONT_SIZE or "Tooltip font size") .. ": " .. val); end
+
 			if FlightMap_UpdateTooltipFont then
 			    FlightMap_UpdateTooltipFont();
 			end
@@ -862,7 +1032,10 @@ function FlightMapOptionsFrame_OnShow()
 		
     end
 
-    FlightMapFontSizeSlider:SetValue( (FlightMap and FlightMap.Opts and FlightMap.Opts.fontSize) or 12 );
+    local currentFontSize = (FlightMapChar.Opts and FlightMapChar.Opts.fontSize) or 12;
+    FlightMapFontSizeSlider:SetValue(currentFontSize);
+    local fsTxt = getglobal("FlightMapFontSizeSliderText");
+    if fsTxt then fsTxt:SetText((FLIGHTMAP_TOOLTIP_FONT_SIZE or "Tooltip font size") .. ": " .. currentFontSize); end
 	if FlightMap_UpdateTooltipFont then FlightMap_UpdateTooltipFont(); end
 end
 
@@ -873,19 +1046,27 @@ function FlightMapOptionsFrame_OnHide()
 end
 
 function FlightMapOptionsCheckButton_OnClick()
+    if not FlightMapChar or not FlightMapChar.Opts then return; end
+
+    -- Prevent toggling UnitXP notify options when UnitXP SP3 is not loaded
+    if (this.option == "notifyTaskbar" or this.option == "notifySound") then
+        if not (IsAddOnLoaded and IsAddOnLoaded("UnitXP_SP3_Addon") and UnitXP) then
+            return;
+        end
+    end
     if (this:GetChecked()) then
-        FlightMap.Opts[this.option] = true;
+        FlightMapChar.Opts[this.option] = true;
     else
-        FlightMap.Opts[this.option] = false;
+        FlightMapChar.Opts[this.option] = false;
     end
 
     local base = "FlightMapOptionsFrame";
-    for _, child in this.children do
+    for _, child in pairs(this.children or {}) do
         local other = getglobal(base .. "Opt" .. child);
         if other then
-            if FlightMap.Opts[this.option] then
+            if FlightMapChar.Opts[this.option] then
                 OptionsFrame_EnableCheckBox(other, 1,
-                    FlightMap.Opts[FLIGHTMAP_OPTIONS[child].option]);
+                    FlightMapChar.Opts[FLIGHTMAP_OPTIONS[child].option]);
             else
                 OptionsFrame_DisableCheckBox(other);
             end
@@ -895,8 +1076,8 @@ end
 
 function FlightMap_UpdateTooltipFont()
     local size = 12;
-	if FlightMap and FlightMap.Opts and FlightMap.Opts.fontSize then
-	    size = FlightMap.Opts.fontSize;
+	if FlightMap and FlightMapChar.Opts and FlightMapChar.Opts.fontSize then
+	    size = FlightMapChar.Opts.fontSize;
 	end
 	
     local maxLines = 30;
@@ -914,7 +1095,7 @@ end
 
 if hooksecurefunc then
     hooksecurefunc("FlightMap_WorldMapButton_OnUpdate", function()
-        if FlightMap and FlightMap.Opts then
+        if FlightMap and FlightMapChar.Opts then
             FlightMap_UpdateTooltipFont();
         end
     end);
@@ -922,7 +1103,7 @@ else
     local _old_WorldMapButton_OnUpdate = FlightMap_WorldMapButton_OnUpdate;
     function FlightMap_WorldMapButton_OnUpdate(arg1)
         _old_WorldMapButton_OnUpdate(arg1);
-        if FlightMap and FlightMap.Opts then
+        if FlightMap and FlightMapChar.Opts then
             FlightMap_UpdateTooltipFont();
         end
     end
