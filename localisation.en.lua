@@ -107,7 +107,40 @@ FLIGHTMAP_OPTIONS[2] = {   -- Option 2: extra POI buttons
     label = "Flight master icons",
     option = "showPOIs",
     tooltip = "Show extra world map icons for flight masters.",
+    children = {12, 13},
 };
+FLIGHTMAP_OPTIONS[12] = {   -- Option 12: continent POI icons
+    label = "Flight master continent icons",
+    option = "showContinentPOIs",
+    tooltip = "Show flight master icons on the continent map.",
+};
+FLIGHTMAP_OPTIONS[13] = {   -- Option 13: POI tooltips
+    label = "Flight master tooltip",
+    option = "showPOITooltips",
+    tooltip = "Show a tooltip when hovering over a flight master icon on the map.",
+};
+FLIGHTMAP_OPTIONS[14] = {   -- Option 14: zone tooltip
+    label = "Show zone tooltip",
+    option = "showZoneTooltip",
+    children = {15},
+    tooltip = "Show a tooltip for the zone when hovering over the continent map.",
+};
+FLIGHTMAP_OPTIONS[15] = {   -- Option 15: zone level ranges
+    label = "Show zone level ranges",
+    option = "showLevelRanges",
+    tooltip = "Display the recommended level range for each zone.",
+};
+FLIGHTMAP_OPTIONS[16] = {   -- Option 16: UnitXP notify taskbar
+    label = "Notify: taskbar icon",
+    option = "notifyTaskbar",
+    tooltip = "Flash the taskbar icon on arrival.",
+};
+FLIGHTMAP_OPTIONS[17] = {   -- Option 17: UnitXP notify sound
+    label = "Notify: system sound",
+    option = "notifySound",
+    tooltip = "Play a system sound on arrival.",
+};
+
 FLIGHTMAP_OPTIONS[3] = {   -- Option 3: Unknown masters
     label = "Show unknown flights",
     option = "showAllInfo",
@@ -155,6 +188,14 @@ FLIGHTMAP_OPTIONS[11] = {   -- Option 11: Confirm flight destinations
     option = "confirmFlights",
     tooltip = "Prompt for confirmation before taking a flight",
 };
+
+-- Dynamic UI strings (used in FlightMap.lua for runtime-created controls)
+FLIGHTMAP_SHOW_ZONE_TOOLTIP             = "Show zone tooltip";
+FLIGHTMAP_SHOW_ZONE_TOOLTIP_TIP         = "Show a tooltip for the zone when hovering over the continent map.";
+FLIGHTMAP_SHOW_ZONE_LEVEL_RANGES        = "Show zone level ranges";
+FLIGHTMAP_SHOW_ZONE_LEVEL_RANGES_TIP    = "Display the recommended level range for each zone.";
+FLIGHTMAP_TOOLTIP_FONT_SIZE             = "Tooltip font size";
+FLIGHTMAP_TOOLTIP_FONT_SIZE_TIP         = "Adjusts the font size of the FlightMap tooltip text.";
 
 -- These constants determine how "Town, Zone" strings look.
 -- SEP_STRING is what separates Town from Zone.  SEP_POSTAMBLE

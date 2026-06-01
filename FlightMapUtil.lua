@@ -2,7 +2,129 @@
 
 FlightMapUtil = {};
 
-------- Data access functions
+-- Session-only merged flight map cache; rebuilt after each load and
+-- whenever lSetDefaultData runs.  Keyed by faction string.
+local lSessionMap = {};
+
+-- Cached player key "Name@Realm" for knownNode lookups
+local lPlayerKey = nil;
+
+-- Deep-copy a node table from the defaults
+local function lCopyNode(v)
+    local node = {};
+    for field, val in pairs(v) do
+        if field == "Location" then
+            local loc = {};
+            for space, coords in pairs(val) do
+                local c = {};
+                for axis, coord in pairs(coords) do c[axis] = coord; end
+                loc[space] = c;
+            end
+            node[field] = loc;
+        elseif type(val) == "table" then
+            local t = {};
+            for sk, sv in pairs(val) do t[sk] = sv; end
+            node[field] = t;
+        else
+            node[field] = val;
+        end
+    end
+    if not node.Flights then node.Flights = {}; end
+    if not node.Costs   then node.Costs   = {}; end
+    return node;
+end
+
+-- Return the default flight data table for a given faction
+local function lGetFactionDefaults(faction)
+    if faction == FLIGHTMAP_ALLIANCE then
+        return FLIGHTMAP_ALLIANCE_FLIGHTS;
+    elseif faction == FLIGHTMAP_HORDE then
+        return FLIGHTMAP_HORDE_FLIGHTS;
+    end
+    return {};
+end
+
+-- Return the per-faction saved-variable override table,
+-- creating it if necessary.
+FlightMapUtil.lGetOverrides = function(faction)
+    if not FlightMap[faction] then FlightMap[faction] = {}; end
+    return FlightMap[faction];
+end
+
+-- Build and cache the session flight map for the current character's
+-- faction.  The session map starts as a deep copy of the faction
+-- defaults, then any saved overrides (new nodes or differing values)
+-- are merged on top.
+FlightMapUtil.getFlightMap = function()
+    local faction = UnitFactionGroup("player");
+    if not faction then return {}; end
+
+    if lSessionMap[faction] then
+        return lSessionMap[faction];
+    end
+
+    -- Deep-copy defaults
+    local map = {};
+    local defaults = lGetFactionDefaults(faction);
+    for k, v in pairs(defaults) do
+        map[k] = lCopyNode(v);
+    end
+
+    -- Merge saved overrides
+    local overrides = FlightMap[faction];
+    if overrides then
+        for k, savedNode in pairs(overrides) do
+            if not map[k] then
+                -- Brand-new node discovered by the player
+                map[k] = lCopyNode(savedNode);
+            else
+                -- Existing node: overlay only the saved fields
+                for field, val in pairs(savedNode) do
+                    if type(val) == "table" and type(map[k][field]) == "table" then
+                        for sk, sv in pairs(val) do
+                            map[k][field][sk] = sv;
+                        end
+                    else
+                        map[k][field] = val;
+                    end
+                end
+            end
+        end
+    end
+
+    lSessionMap[faction] = map;
+    return map;
+end
+
+-- Invalidate the session cache (call after loading saved variables)
+FlightMapUtil.resetFlightMapCache = function()
+    lSessionMap = {};
+    lPlayerKey  = nil;
+end
+
+-- Returns true iff the current character has seen a given node.
+-- If the second argument is true, also records knowledge of the node.
+-- Knowledge is stored per-character in FlightMapChar.Knowledge.
+FlightMapUtil.knownNode = function(node, learning)
+    if not lPlayerKey then
+        lPlayerKey = UnitName("player") .. "@" .. GetCVar("realmName");
+    end
+
+    if not FlightMapChar then FlightMapChar = {}; end
+    if not FlightMapChar.Knowledge then FlightMapChar.Knowledge = {}; end
+
+    local known = FlightMapChar.Knowledge[lPlayerKey];
+    if not known then
+        known = {};
+        FlightMapChar.Knowledge[lPlayerKey] = known;
+    end
+
+    if learning then
+        known[node] = true;
+    end
+
+    return known[node];
+end
 
 -- Break up a "Town, Zone" string into town and zone components.  If
 -- there's no comma, ie, Moonglade, the string will be returned for
@@ -23,48 +145,6 @@ end
 -- Construct a node name from its continent and taxi coordinates
 FlightMapUtil.makeNodeName = function(continent, taxiX, taxiY)
     return string.format("%d:%d:%d", continent, taxiX * 1000, taxiY * 1000);
-end
-
--- Return the flight map data appropriate to the current character
-FlightMapUtil.getFlightMap = function()
-    -- Return default flight data for the specified faction
-    local function lGetFactionDefaults(faction)
-        if faction == FLIGHTMAP_ALLIANCE then
-            return FLIGHTMAP_ALLIANCE_FLIGHTS;
-        elseif faction == FLIGHTMAP_HORDE then
-            return FLIGHTMAP_HORDE_FLIGHTS;
-        end
-        return {};  -- Catch all
-    end
-
-    local _, faction = UnitFactionGroup("player");
-    if not faction then return {}; end
-    if not FlightMap[faction] then
-        FlightMap[faction] = lGetFactionDefaults(faction);
-    end
-    return FlightMap[faction];
-end
-
--- Returns true if the current character has seen a given node;
--- if the second argument is a true value, teaches the character of
--- the node's existence.
-FlightMapUtil.knownNode = function(node, learning)
-    local name = UnitName("player");
-    local realm = GetCVar("realmName");
-
-    -- Conglomerate key
-    local key = name .. "@" .. realm;
-
-    -- If nothing is known for this character, make it known!
-    if not FlightMap.Knowledge[key] then
-        FlightMap.Knowledge[key] = {};
-    end
-
-    if learning then
-        FlightMap.Knowledge[key][node] = true;
-    end
-
-    return FlightMap.Knowledge[key][node];
 end
 
 -- TODO: put elsewhere

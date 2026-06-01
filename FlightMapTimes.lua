@@ -47,7 +47,7 @@ function FlightMapTimes_TakeTaxiNode(id)
             TaxiNodePosition(thatNode));
 
     -- If both thisNode and thatNode exist...
-    if (FlightMap.Opts.useTimer and thisNode and thatNode) then
+    if (FlightMapChar.Opts.useTimer and thisNode and thatNode) then
         -- Check if this flight path has a known duration
         if map[source] and map[source].Flights[dest] then
             -- Time exists, so set it up
@@ -87,7 +87,7 @@ function FlightMapTimes_TakeTaxiNode(id)
     end
 
     -- Check for confirmation box
-    if FlightMap.Opts.confirmFlights then
+    if FlightMapChar.Opts.confirmFlights then
         local name = TaxiNodeName(thatNode);
         local duration = "";
 
@@ -157,7 +157,7 @@ end
 
 local function lSaveFlightTime(length, from, to)
     -- Check for locked times
-    if FlightMap.Opts.lockFlightTimes then return; end
+    if FlightMapChar.Opts.lockFlightTimes then return; end
 
     local map = FlightMapUtil.getFlightMap();
 
@@ -168,10 +168,30 @@ local function lSaveFlightTime(length, from, to)
         if zname ~= map[this.destNode].Zone then return; end
     end
 
-    -- Save the time
+    -- Update the session map always
     if map[this.sourceNode] then
         map[this.sourceNode].Flights[this.destNode] = length;
     end
+
+    -- Only persist to SavedVariables when the time differs from the
+    -- built-in default by 1 second or more
+    local faction   = UnitFactionGroup("player");
+    local defaults  = (faction == FLIGHTMAP_ALLIANCE)
+                      and FLIGHTMAP_ALLIANCE_FLIGHTS
+                      or  FLIGHTMAP_HORDE_FLIGHTS;
+    local dfNode    = defaults[this.sourceNode];
+    local dfTime    = dfNode and dfNode.Flights and dfNode.Flights[this.destNode];
+
+    if dfTime and math.abs(length - dfTime) < 1.0 then
+        -- Within 1s of default — no need to save
+        return;
+    end
+
+    -- Save the override
+    local sv = FlightMapUtil.lGetOverrides(faction);
+    if not sv[this.sourceNode]         then sv[this.sourceNode]         = {}; end
+    if not sv[this.sourceNode].Flights then sv[this.sourceNode].Flights = {}; end
+    sv[this.sourceNode].Flights[this.destNode] = length;
 end
 
 function FlightMapTimes_OnUpdate()
@@ -202,6 +222,17 @@ function FlightMapTimes_OnUpdate()
             if (not this.endTime or (GetTime() < this.endTime)) then
                 local length = GetTime() - this.startTime;
                 lSaveFlightTime(length, this.sourceNode, this.destNode);
+            end
+            -- UnitXP SP3 OS notifications on landing
+            if IsAddOnLoaded and IsAddOnLoaded("UnitXP_SP3_Addon") and UnitXP then
+                if FlightMapChar and FlightMapChar.Opts then
+                    if FlightMapChar.Opts.notifyTaskbar then
+                        pcall(UnitXP, "notify", "taskbarIcon");
+                    end
+                    if FlightMapChar.Opts.notifySound then
+                        pcall(UnitXP, "notify", "systemSound", "SystemDefault");
+                    end
+                end
             end
         end
     else
@@ -249,4 +280,9 @@ end
 
 function FlightMapTimes_OnDragStop()
     FlightMapTimesFrame:StopMovingOrSizing();
+    FlightMapTimesFrame:SetUserPlaced(false);
+    local point, _, _, x, y = FlightMapTimesFrame:GetPoint();
+    if FlightMapChar and FlightMapChar.Opts then
+        FlightMapChar.Opts.timerPos = { point = point, x = x, y = y };
+    end
 end
