@@ -22,5 +22,5 @@ Enhanced version: Drakensangs
 <img width="645" height="619" alt="Untitled" src="https://github.com/user-attachments/assets/4b16a1a7-d801-4f4c-a7d0-b787bb510713" />
 <img width="1603" height="1068" alt="Untitled1" src="https://github.com/user-attachments/assets/c25ce356-388f-43e6-b429-799bf78797d6" />
 <img width="1603" height="1068" alt="Untitled2" src="https://github.com/user-attachments/assets/0cf7b2ff-9ce2-4970-8f4b-1d94b0272299" />
-<img width="1603" height="1068" alt="Untitled3" src="https://github.com/user-attachments/assets/d3dbdcd3-bf9e-4b79-8eab-1d7b86f24b76" />
+<img width="1880" height="1256" alt="113" src="https://github.com/user-attachments/assets/78911375-1aa4-4281-94c1-fab789abc265" />
 <img width="1603" height="1068" alt="Untitled4" src="https://github.com/user-attachments/assets/40404568-8945-4338-bf11-4c3e7f439d1b" />
