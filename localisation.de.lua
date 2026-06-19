@@ -188,18 +188,26 @@ if (GetLocale() == "deDE") then
         option = "fullTaxiMap",
         tooltip = "Zeige alle Flugpunkte im Flugmeister-Fenster.",
     };
+    FLIGHTMAP_OPTIONS[18] = {   -- Option 18: Minimap button
+        label = "Minimap-Schaltfl\195\164che",
+        option = "showMinimapButton",
+        tooltip = "Zeigt eine FlightMap-Schaltfl\195\164che auf der Minimap an.",
+    };
     FLIGHTMAP_OPTIONS[11] = {   -- Option 11: Confirm flight destinations
         label = "Fl\195\188ge best\195\164tigen",
         option = "confirmFlights",
         tooltip = "Nachfragen bevor die Fl\195\188ge starten",
     };
 
-    FLIGHTMAP_SHOW_ZONE_TOOLTIP             = "Zonentooltip anzeigen";
+FLIGHTMAP_SHOW_ZONE_TOOLTIP             = "Zonentooltip anzeigen";
 FLIGHTMAP_SHOW_ZONE_TOOLTIP_TIP         = "Tooltip fuer die Zone anzeigen, wenn die Maus ueber der Kontinentkarte schwebt.";
 FLIGHTMAP_SHOW_ZONE_LEVEL_RANGES        = "Zonenlevelbereiche anzeigen";
 FLIGHTMAP_SHOW_ZONE_LEVEL_RANGES_TIP    = "Den empfohlenen Levelbereich f9588r jede Zone anzeigen.";
-FLIGHTMAP_TOOLTIP_FONT_SIZE             = "Tooltip-Schriftgr9582959e";
-FLIGHTMAP_TOOLTIP_FONT_SIZE_TIP         = "Schriftgr9582959e des FlightMap-Tooltip-Texts anpassen.";
+FLIGHTMAP_TOOLTIP_FONT_SIZE             = "Tooltip-Schriftgr9582959e";
+FLIGHTMAP_TOOLTIP_FONT_SIZE_TIP         = "Schriftgr9582959e des FlightMap-Tooltip-Texts anpassen.";
+FLIGHTMAP_MINIMAP_TIP1                  = "Linksklick, um das FlightMap-Men\195\188 zu \195\182ffnen.";
+FLIGHTMAP_MINIMAP_TIP2                  = "Rechtsklick halten, um den Minimap-Knopf zu bewegen.";
+FLIGHTMAP_MINIMAP_TIP3                  = "Strg + Linksklick, um die Flugkarte zu \195\182ffnen.";
 
 -- These constants determine how "Town, Zone" strings look.
     -- SEP_STRING is what separates Town from Zone.  SEP_POSTAMBLE

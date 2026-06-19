@@ -192,18 +192,26 @@ if (GetLocale() == "frFR") then
         option = "fullTaxiMap",
         tooltip = "Show unreachable nodes on the taxi window map",
     };
+    FLIGHTMAP_OPTIONS[18] = {   -- Option 18: Minimap button
+        label = "Bouton de la minicarte",
+        option = "showMinimapButton",
+        tooltip = "Affiche un bouton FlightMap sur la minicarte.",
+    };
     FLIGHTMAP_OPTIONS[11] = {   -- Option 11: Confirm flight destinations
         label = "Confirm flights",
         option = "confirmFlights",
         tooltip = "Prompt for confirmation before taking a flight",
     };
 
-    FLIGHTMAP_SHOW_ZONE_TOOLTIP             = "Afficher l'infobulle de zone";
+FLIGHTMAP_SHOW_ZONE_TOOLTIP             = "Afficher l'infobulle de zone";
 FLIGHTMAP_SHOW_ZONE_TOOLTIP_TIP         = "Afficher une infobulle pour la zone en survolant la carte du continent.";
 FLIGHTMAP_SHOW_ZONE_LEVEL_RANGES        = "Niveaux de zone";
 FLIGHTMAP_SHOW_ZONE_LEVEL_RANGES_TIP    = "Afficher les niveaux recommand959s pour chaque zone.";
 FLIGHTMAP_TOOLTIP_FONT_SIZE             = "Taille de police de l'infobulle";
 FLIGHTMAP_TOOLTIP_FONT_SIZE_TIP         = "R959gle la taille de police du texte de l'infobulle FlightMap.";
+FLIGHTMAP_MINIMAP_TIP1                  = "Clic gauche pour ouvrir le menu FlightMap.";
+FLIGHTMAP_MINIMAP_TIP2                  = "Maintenir le clic droit pour d\195\169placer le bouton de la minicarte.";
+FLIGHTMAP_MINIMAP_TIP3                  = "Ctrl + clic gauche pour ouvrir la carte des vols.";
 
 -- These constants determine how "Town, Zone" strings look.
     -- SEP_STRING is what separates Town from Zone.  SEP_POSTAMBLE

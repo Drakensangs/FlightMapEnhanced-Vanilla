@@ -198,22 +198,30 @@ if (GetLocale() == "zhCN") then
         option = "fullTaxiMap",
         tooltip = "Show unreachable nodes on the taxi window map",
     };
+    FLIGHTMAP_OPTIONS[18] = {   -- Option 18: Minimap button
+        label = "小地图按钮",
+        option = "showMinimapButton",
+        tooltip = "在小地图上显示“飞行地图”按钮。",
+    };
     FLIGHTMAP_OPTIONS[11] = {   -- Option 11: Confirm flight destinations
         label = "Confirm flights",
         option = "confirmFlights",
         tooltip = "Prompt for confirmation before taking a flight",
     };
 
-    FLIGHTMAP_SHOW_ZONE_TOOLTIP             = "显示区域提示框";
+FLIGHTMAP_SHOW_ZONE_TOOLTIP             = "显示区域提示框";
 FLIGHTMAP_SHOW_ZONE_TOOLTIP_TIP         = "在大陆地图上悬停时显示区域提示框。";
 FLIGHTMAP_SHOW_ZONE_LEVEL_RANGES        = "显示区域等级范围";
 FLIGHTMAP_SHOW_ZONE_LEVEL_RANGES_TIP    = "显示每个区域的推荐等级范围。";
 FLIGHTMAP_TOOLTIP_FONT_SIZE             = "提示字体大小";
 FLIGHTMAP_TOOLTIP_FONT_SIZE_TIP         = "调整 FlightMap 提示文字的字体大小。";
+FLIGHTMAP_MINIMAP_TIP1                  = "单击鼠标左键打开 FlightMap 菜单。";
+FLIGHTMAP_MINIMAP_TIP2                  = "按住鼠标右键移动小地图按钮。";
+FLIGHTMAP_MINIMAP_TIP3                  = "按住Ctrl键并单击鼠标左键打开飞行地图。"
 
 -- These constants determine how "Town, Zone" strings look.
     -- SEP_STRING is what separates Town from Zone.  SEP_POSTAMBLE
     -- is anything that is after Zone.
     FLIGHTMAP_SEP_STRING    = "，";
     FLIGHTMAP_SEP_POSTAMBLE = "";
-end
+end;

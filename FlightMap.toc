@@ -2,7 +2,7 @@
 ## Title: FlightMap
 ## Notes: Adds a tooltip to the world map showing flightpaths into and out of regions, and region level ranges.
 ## Author: Original addon: Dhask; Enhanced version: Drakensangs
-## Version: 1.13
+## Version: 1.14
 ## SavedVariables: FlightMap
 ## SavedVariablesPerCharacter: FlightMapChar
 ## OptionalDeps: myAddOns, Sea, UnitXP_SP3_Addon

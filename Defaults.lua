@@ -21,6 +21,7 @@ FLIGHTMAP_DEFAULT_OPTS = {
      ["notifySound"]       = false,
 	 ["fontSize"]          = 12,
      ["timerPos"]          = { point = "TOP", x = 0, y = -11 },
+     ["showMinimapButton"] = true,
 };
 
 -- Sub-zones

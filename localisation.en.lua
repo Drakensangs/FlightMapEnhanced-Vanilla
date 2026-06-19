@@ -183,6 +183,11 @@ FLIGHTMAP_OPTIONS[10] = {   -- Option 10: Taxi window extras
     option = "fullTaxiMap",
     tooltip = "Show flight network on flight selection window",
 };
+FLIGHTMAP_OPTIONS[18] = {   -- Option 18: Minimap button
+    label = "Minimap button",
+    option = "showMinimapButton",
+    tooltip = "Show a FlightMap button on the minimap.",
+};
 FLIGHTMAP_OPTIONS[11] = {   -- Option 11: Confirm flight destinations
     label = "Confirm flights",
     option = "confirmFlights",
@@ -196,6 +201,9 @@ FLIGHTMAP_SHOW_ZONE_LEVEL_RANGES        = "Show zone level ranges";
 FLIGHTMAP_SHOW_ZONE_LEVEL_RANGES_TIP    = "Display the recommended level range for each zone.";
 FLIGHTMAP_TOOLTIP_FONT_SIZE             = "Tooltip font size";
 FLIGHTMAP_TOOLTIP_FONT_SIZE_TIP         = "Adjusts the font size of the FlightMap tooltip text.";
+FLIGHTMAP_MINIMAP_TIP1                  = "Left click to open FlightMap menu.";
+FLIGHTMAP_MINIMAP_TIP2                  = "Hold right click to move minimap button.";
+FLIGHTMAP_MINIMAP_TIP3                  = "Ctrl left click to open flight map.";
 
 -- These constants determine how "Town, Zone" strings look.
 -- SEP_STRING is what separates Town from Zone.  SEP_POSTAMBLE

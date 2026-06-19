@@ -8,7 +8,7 @@
 -- for any damage that may arise from the use of this AddOn.
 
 -- Version number
-FLIGHTMAP_VERSION   = "1.13";
+FLIGHTMAP_VERSION   = "1.14";
 
 -- Maximum lines to draw at once
 FLIGHTMAP_MAX_PATHS = 15;
@@ -146,6 +146,7 @@ FLIGHTMAP_DEFAULT_OPTS = FLIGHTMAP_DEFAULT_OPTS or {
     fontSize = 12,
     timerPos = { point = "TOP", x = 0, y = -11 },
     lockFlightTimes = false,
+    showMinimapButton = true,
 };
 
 -- Strip saved overrides that are identical to (or within 1s of) the
@@ -886,13 +887,14 @@ function FlightMap_OnEvent(event)
         end
 
 		FlightMap_UpdateTooltipFont();
+        FlightMap_UpdateMinimapButton();
 
         if (myAddOnsFrame_Register) then
             myAddOnsFrame_Register({
                 name         = "FlightMap",
                 version      = FLIGHTMAP_VERSION,
                 releaseDate  = FLIGHTMAP_RELEASE,
-                author       = "Dhask",
+                author       = "Original addon: Dhask; Enhanced version: Drakensangs",
                 category     = MYADDONS_CATEGORY_MAP,
                 optionsframe = "FlightMapOptionsFrame",
             });
@@ -1060,6 +1062,10 @@ function FlightMapOptionsCheckButton_OnClick()
         FlightMapChar.Opts[this.option] = false;
     end
 
+    if this.option == "showMinimapButton" then
+        FlightMap_UpdateMinimapButton();
+    end
+
     local base = "FlightMapOptionsFrame";
     for _, child in pairs(this.children or {}) do
         local other = getglobal(base .. "Opt" .. child);
@@ -1107,4 +1113,173 @@ else
             FlightMap_UpdateTooltipFont();
         end
     end
+end
+----------------- Minimap Button -----------------
+
+local FLIGHTMAP_MINIMAP_DEFAULT_ANGLE = 225;
+
+local function lMinimapButtonGetAngle()
+    if FlightMapChar and FlightMapChar.minimapButtonAngle then
+        return FlightMapChar.minimapButtonAngle;
+    end
+    return FLIGHTMAP_MINIMAP_DEFAULT_ANGLE;
+end
+
+local function lMinimapButtonSaveAngle(angle)
+    if not FlightMapChar then FlightMapChar = {}; end
+    FlightMapChar.minimapButtonAngle = angle;
+end
+
+local function lUpdateMinimapButtonPosition()
+    local frame = FlightMapMinimapButtonFrame;
+    if not frame then return; end
+    local angle = lMinimapButtonGetAngle();
+    local rad = math.rad(angle);
+    local radius = 80;
+    local x = math.cos(rad) * radius;
+    local y = math.sin(rad) * radius;
+    frame:ClearAllPoints();
+    frame:SetPoint("CENTER", Minimap, "CENTER", x, y);
+end
+
+function FlightMap_UpdateMinimapButton()
+    local frame = FlightMapMinimapButtonFrame;
+    if not frame then return; end
+    if FlightMapChar and FlightMapChar.Opts and FlightMapChar.Opts.showMinimapButton then
+        frame:Show();
+        lUpdateMinimapButtonPosition();
+    else
+        frame:Hide();
+    end
+end
+
+function FlightMapMinimapButton_OnUpdate()
+    local mx, my = Minimap:GetCenter();
+    local scale  = Minimap:GetEffectiveScale();
+    local cx, cy = GetCursorPosition();
+    cx = cx / scale;
+    cy = cy / scale;
+    local angle  = math.deg(math.atan2(cy - my, cx - mx));
+    local frame = FlightMapMinimapButtonFrame;
+    frame:ClearAllPoints();
+    frame:SetPoint("CENTER", Minimap, "CENTER",
+        math.cos(math.rad(angle)) * 80, math.sin(math.rad(angle)) * 80);
+    lMinimapButtonSaveAngle(angle);
+end
+
+function FlightMapMinimapButton_OnMouseDown(button)
+    if button == "RightButton" then
+        FlightMapMinimapButton:SetScript("OnUpdate", FlightMapMinimapButton_OnUpdate);
+    end
+end
+
+function FlightMapMinimapButton_OnMouseUp(button)
+    if button == "RightButton" then
+        FlightMapMinimapButton:SetScript("OnUpdate", nil);
+        lUpdateMinimapButtonPosition();
+    elseif button == "LeftButton" then
+        if IsControlKeyDown() then
+            FlightMapTaxi_ShowContinent();
+        else
+            if FlightMapOptionsFrame:IsVisible() then
+                HideUIPanel(FlightMapOptionsFrame);
+            else
+                ShowUIPanel(FlightMapOptionsFrame);
+            end
+        end
+    end
+end
+
+function FlightMapMinimapButton_OnEnter()
+    GameTooltip:SetOwner(FlightMapMinimapButton, "ANCHOR_LEFT");
+    GameTooltip:SetText("FlightMap");
+    GameTooltip:AddLine(FLIGHTMAP_MINIMAP_TIP1, 1, 1, 1);
+    GameTooltip:AddLine(FLIGHTMAP_MINIMAP_TIP3, 1, 1, 1);
+    GameTooltip:AddLine(FLIGHTMAP_MINIMAP_TIP2, 1, 1, 1);
+    GameTooltip:Show();
+end
+
+function FlightMapMinimapButton_OnLeave()
+    GameTooltip:Hide();
+end
+
+----------------- pfUI -----------------
+
+local function FlightMap_ApplypfUISkin()
+    if not IsAddOnLoaded("pfUI") then return end
+    if not pfUI or not pfUI.api then return end
+
+    local CreateBackdrop      = pfUI.api.CreateBackdrop;
+    local CreateBackdropShadow = pfUI.api.CreateBackdropShadow;
+    local StripTextures       = pfUI.api.StripTextures;
+    local SkinButton          = pfUI.api.SkinButton;
+    local SkinCheckbox        = pfUI.api.SkinCheckbox;
+    local SkinSlider          = pfUI.api.SkinSlider;
+
+    local frame = FlightMapOptionsFrame;
+    if not frame then return end
+
+    -- Strip default Blizzard textures and apply pfUI backdrop
+    StripTextures(frame, true);
+    CreateBackdrop(frame, nil, true, 0.85);
+    CreateBackdropShadow(frame);
+
+    local title = FlightMapOptionsFrameTitle;
+    if title then
+        title:SetFont(pfUI.font_default, pfUI_config.global.font_size + 2);
+        title:ClearAllPoints();
+        title:SetPoint("TOP", frame, "TOP", 0, -10);
+    end
+
+    SkinButton(FlightMapOptionsFrameClose);
+
+    local checkboxes = {
+        "FlightMapOptionsFrameOpt1",  "FlightMapOptionsFrameOpt2",
+        "FlightMapOptionsFrameOpt3",  "FlightMapOptionsFrameOpt4",
+        "FlightMapOptionsFrameOpt5",  "FlightMapOptionsFrameOpt6",
+        "FlightMapOptionsFrameOpt7",  "FlightMapOptionsFrameOpt8",
+        "FlightMapOptionsFrameOpt9",  "FlightMapOptionsFrameOpt10",
+        "FlightMapOptionsFrameOpt11", "FlightMapOptionsFrameOpt12",
+        "FlightMapOptionsFrameOpt13", "FlightMapOptionsFrameOpt14",
+        "FlightMapOptionsFrameOpt15", "FlightMapOptionsFrameOpt16",
+        "FlightMapOptionsFrameOpt17", "FlightMapOptionsFrameOpt18",
+    };
+    for _, name in ipairs(checkboxes) do
+        local cb = getglobal(name);
+        if cb then SkinCheckbox(cb, 26) end
+    end
+
+    local function lSkinSlider()
+        local slider = FlightMapFontSizeSlider;
+        if not slider or slider._pfSkinned then return end
+        slider._pfSkinned = true;
+        SkinSlider(slider);
+    end
+
+    if FlightMapFontSizeSlider then
+        lSkinSlider();
+    else
+        local origOnShow = FlightMapOptionsFrame:GetScript("OnShow");
+        FlightMapOptionsFrame:SetScript("OnShow", function()
+            if origOnShow then origOnShow() end
+            lSkinSlider();
+        end);
+    end
+
+    local SkinDropDown = pfUI.api.SkinDropDown;
+    if SkinDropDown and FlightMapTaxiContinents then
+        SkinDropDown(FlightMapTaxiContinents);
+    end
+end
+
+do
+    local lSkinWatcher = CreateFrame("Frame");
+    lSkinWatcher:RegisterEvent("ADDON_LOADED");
+    lSkinWatcher:RegisterEvent("PLAYER_ENTERING_WORLD");
+    lSkinWatcher:SetScript("OnEvent", function()
+        if IsAddOnLoaded("pfUI") and pfUI and pfUI.api then
+            FlightMap_ApplypfUISkin();
+            lSkinWatcher:UnregisterAllEvents();
+        end
+    end);
 end

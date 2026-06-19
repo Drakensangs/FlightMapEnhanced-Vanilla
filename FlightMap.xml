@@ -113,7 +113,7 @@
   <Frame name="FlightMapOptionsFrame" toplevel="true" frameStrata="DIALOG"
          movable="true" enableMouse="true" hidden="true" parent="UIParent"
          enableKeyboard="true">
-    <Size><AbsDimension x="420" y="400"/></Size>
+    <Size><AbsDimension x="420" y="420"/></Size>
     <Anchors><Anchor point="CENTER"/></Anchors>
     <Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background"
               edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
@@ -167,6 +167,10 @@
       <!-- Opt10: Enhanced flight window -->
       <CheckButton name="$parentOpt10" inherits="FlightMapOptionsCheckButtonTemplate">
         <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="20" y="-256"/></Offset></Anchor></Anchors>
+      </CheckButton>
+      <!-- Opt18: Minimap button -->
+      <CheckButton name="$parentOpt18" inherits="FlightMapOptionsCheckButtonTemplate">
+        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="20" y="-284"/></Offset></Anchor></Anchors>
       </CheckButton>
 
       <!-- RIGHT COLUMN (x=220) -->
@@ -223,5 +227,47 @@
       <OnHide>FlightMapOptionsFrame_OnHide();</OnHide>
     </Scripts>
   </Frame>
+
+
+<Frame name="FlightMapMinimapButtonFrame" parent="Minimap" hidden="true" frameStrata="MEDIUM">
+  <Size><AbsDimension x="33" y="33"/></Size>
+  <Anchors>
+    <Anchor point="CENTER" relativeTo="Minimap" relativePoint="CENTER">
+      <Offset><AbsDimension x="-57" y="-57"/></Offset>
+    </Anchor>
+  </Anchors>
+  <Frames>
+    <Button name="FlightMapMinimapButton" enableMouse="true" movable="false">
+      <HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Round"/>
+      <Size><AbsDimension x="33" y="33"/></Size>
+      <Anchors><Anchor point="TOPLEFT"/></Anchors>
+      <Layers>
+        <Layer level="BACKGROUND">
+          <Texture name="$parentIcon" file="Interface\Icons\spell_magic_featherfall">
+            <Size><AbsDimension x="19" y="19"/></Size>
+            <Anchors>
+              <Anchor point="CENTER">
+                <Offset><AbsDimension x="-1" y="2"/></Offset>
+              </Anchor>
+            </Anchors>
+            <TexCoords left="0.075" right="0.925" top="0.075" bottom="0.925"/>
+          </Texture>
+        </Layer>
+        <Layer level="OVERLAY">
+          <Texture name="$parentBorder" file="Interface\Minimap\MiniMap-TrackingBorder">
+            <Size><AbsDimension x="52" y="52"/></Size>
+            <Anchors><Anchor point="TOPLEFT"/></Anchors>
+          </Texture>
+        </Layer>
+      </Layers>
+      <Scripts>
+        <OnMouseDown>FlightMapMinimapButton_OnMouseDown(arg1);</OnMouseDown>
+        <OnMouseUp>FlightMapMinimapButton_OnMouseUp(arg1);</OnMouseUp>
+        <OnEnter>FlightMapMinimapButton_OnEnter();</OnEnter>
+        <OnLeave>FlightMapMinimapButton_OnLeave();</OnLeave>
+      </Scripts>
+    </Button>
+  </Frames>
+</Frame>
 
 </Ui>

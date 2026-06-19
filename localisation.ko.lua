@@ -187,18 +187,26 @@ if (GetLocale() == "koKR") then
         option = "fullTaxiMap",
         tooltip = "Show unreachable nodes on the taxi window map",
     };
+    FLIGHTMAP_OPTIONS[18] = {   -- Option 18: Minimap button
+        label = "미니맵 버튼",
+        option = "showMinimapButton",
+        tooltip = "미니맵에 FlightMap 버튼을 표시합니다.",
+    };
     FLIGHTMAP_OPTIONS[11] = {   -- Option 11: Confirm flight destinations
         label = "Confirm flights",
         option = "confirmFlights",
         tooltip = "Prompt for confirmation before taking a flight",
     };
 
-    FLIGHTMAP_SHOW_ZONE_TOOLTIP             = "지역 툴팁 표시";
+FLIGHTMAP_SHOW_ZONE_TOOLTIP             = "지역 툴팁 표시";
 FLIGHTMAP_SHOW_ZONE_TOOLTIP_TIP         = "대륙 지도에서 마우스를 올리면 지역 툴팁을 표시합니다.";
 FLIGHTMAP_SHOW_ZONE_LEVEL_RANGES        = "지역 레벨 범위 표시";
 FLIGHTMAP_SHOW_ZONE_LEVEL_RANGES_TIP    = "각 지역의 권장 레벨 범위를 표시합니다.";
 FLIGHTMAP_TOOLTIP_FONT_SIZE             = "휴정 글구 크기";
 FLIGHTMAP_TOOLTIP_FONT_SIZE_TIP         = "FlightMap 휴정 텍스트의 글구 크기를 조정합니다.";
+FLIGHTMAP_MINIMAP_TIP1                  = "마우스 왼쪽 버튼을 클릭하여 FlightMap 메뉴를 엽니다.";
+FLIGHTMAP_MINIMAP_TIP2                  = "마우스 오른쪽 버튼을 길게 눌러 미니맵 버튼을 이동하세요.";
+FLIGHTMAP_MINIMAP_TIP3                  = "Ctrl 키를 누른 상태에서 마우스 왼쪽 버튼을 클릭하여 비행 경로 지도를 엽니다.";
 
 -- These constants determine how "Town (Zone)" strings look.
     -- SEP_STRING is what separates Town from Zone.  SEP_POSTAMBLE

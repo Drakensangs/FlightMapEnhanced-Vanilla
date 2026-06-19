@@ -171,6 +171,11 @@ FLIGHTMAP_OPTIONS[10] = {   -- Option 10: Taxi window extras
     option = "fullTaxiMap",
     tooltip = "在飛行路線地圖上顯示所有飛行網路",
 };
+    FLIGHTMAP_OPTIONS[18] = {   -- Option 18: Minimap button
+        label = "小地圖按鈕",
+        option = "showMinimapButton",
+        tooltip = "在小地圖上顯示“飛行地圖”按鈕。",
+    };
 FLIGHTMAP_OPTIONS[11] = {   -- Option 11: Confirm flight destinations
     label = "確認飛行路線",
     option = "confirmFlights",
@@ -183,6 +188,9 @@ FLIGHTMAP_SHOW_ZONE_LEVEL_RANGES        = "顯示区域等級範圍";
 FLIGHTMAP_SHOW_ZONE_LEVEL_RANGES_TIP    = "顯示每個区域的建議等級範圍。";
 FLIGHTMAP_TOOLTIP_FONT_SIZE             = "提示字體大小";
 FLIGHTMAP_TOOLTIP_FONT_SIZE_TIP         = "調整 FlightMap 提示文字的字體大小。";
+FLIGHTMAP_MINIMAP_TIP1                  = "點選滑鼠左鍵開啟 FlightMap 選單。";
+FLIGHTMAP_MINIMAP_TIP2                  = "按住滑鼠右鍵移動小地圖按鈕。";
+FLIGHTMAP_MINIMAP_TIP3                  = "按住Ctrl鍵並點選滑鼠左鍵開啟飛行地圖。";
 
 -- These constants determine how "Town, Zone" strings look.
 -- SEP_STRING is what separates Town from Zone.  SEP_POSTAMBLE
