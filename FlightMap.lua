@@ -614,6 +614,9 @@ local function lUpdateTooltip(zoneName)
             "BOTTOMLEFT", 0, 0);
 
     if flights > 0 or (levels and FlightMapChar.Opts.showLevelRanges) then
+        if FlightMap_IsCartographerActive() then
+            FlightMap_FixZoneTooltipBackdrop(FlightMapTooltip);
+        end
         FlightMapTooltip:Show();
     else
         FlightMapTooltip:Hide();
@@ -621,6 +624,8 @@ local function lUpdateTooltip(zoneName)
 
     FlightMapTooltip:ClearAllPoints();
     FlightMapTooltip:SetPoint("BOTTOMLEFT", WorldMapDetailFrame);
+
+    FlightMap_FixMagnifyCartographerAnchor(FlightMapTooltip);
 end
 
 -- Returns true iff an existing world map POI icon is very close to the given coordinates
@@ -816,7 +821,13 @@ function FlightMapPOIButton_OnEnter()
         WorldMapTooltip:SetOwner(this, "ANCHOR_RIGHT");
     end
     lAddFlightsForNode(WorldMapTooltip, this.node, "");
+    if FlightMap_IsCartographerActive() then
+        WorldMapTooltip:SetAlpha(1);
+    end
     WorldMapTooltip:Show();
+
+    WorldMapTooltip:SetFrameStrata("TOOLTIP");
+    WorldMapTooltip:SetFrameLevel((FlightMapTooltip:GetFrameLevel() or 0) + 10);
 end
 
 ---------------- Initialization functions -----------------
@@ -1284,6 +1295,159 @@ do
     end);
 end
 
+--Cartographer compatibility
+local FLIGHTMAP_TOOLTIP_BACKDROP = {
+    bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+    tile = true, tileSize = 16, edgeSize = 16,
+    insets = { left = 5, right = 5, top = 5, bottom = 5 },
+};
+
+local lCartographerDetected = false;
+
+function FlightMap_IsCartographerActive()
+    return lCartographerDetected;
+end
+
+function FlightMap_RaiseAboveCartographer(tooltip)
+    tooltip:SetAlpha(1);
+    tooltip:SetFrameStrata("TOOLTIP");
+    tooltip:SetFrameLevel((WorldMapFrame:GetFrameLevel() or 0) + 50);
+end
+
+function FlightMap_FixZoneTooltipBackdrop(tooltip)
+    tooltip:SetBackdrop(FLIGHTMAP_TOOLTIP_BACKDROP);
+    tooltip:SetBackdropColor(0, 0, 0, 0.5);
+    tooltip:SetBackdropBorderColor(0, 0, 0, 0);
+    FlightMap_RaiseAboveCartographer(tooltip);
+end
+
+do
+    local lCartoWatcher = CreateFrame("Frame");
+    lCartoWatcher:RegisterEvent("ADDON_LOADED");
+    lCartoWatcher:RegisterEvent("PLAYER_ENTERING_WORLD");
+    lCartoWatcher:SetScript("OnEvent", function()
+        if IsAddOnLoaded("Cartographer") and Cartographer then
+            lCartographerDetected = true;
+            lCartoWatcher:UnregisterAllEvents();
+        end
+    end);
+end
+
+-- Magnify compatibility
+local lMagnifyDetected = false;
+
+function FlightMap_IsMagnifyActive()
+    return lMagnifyDetected;
+end
+
+function FlightMap_FixShaguMapSize()
+    if FlightMap_IsCartographerActive() then
+        return;
+    end
+    if not IsAddOnLoaded("ShaguTweaks") then
+        return;
+    end
+
+    local worldMapWindowEnabled = ShaguTweaks_config
+            and ShaguTweaks_config["WorldMap Window"] == 1;
+    if worldMapWindowEnabled then
+        return;
+    end
+
+    if WorldMapFrameScrollFrame then
+        MAGNIFY_MIN_ZOOM = 1;
+        WorldMapFrameScrollFrame:SetWidth(1002);
+        WorldMapFrameScrollFrame:SetHeight(668);
+        WorldMapFrameScrollFrame:ClearAllPoints();
+        WorldMapFrameScrollFrame:SetPoint("TOP", WorldMapFrame, 0, -70);
+        if WorldMapDetailFrame then
+            WorldMapFrameScrollFrame:SetScrollChild(WorldMapDetailFrame);
+        end
+    end
+
+    if WorldMapFrameAreaFrame then
+        WorldMapFrameAreaFrame:SetParent(WorldMapFrame);
+        WorldMapFrameAreaFrame:ClearAllPoints();
+        WorldMapFrameAreaFrame:SetPoint("TOP", WorldMapFrame, 0, -60);
+        WorldMapFrameAreaFrame:SetFrameStrata("FULLSCREEN_DIALOG");
+    end
+
+    if Magnify_ResetZoom then
+        Magnify_ResetZoom();
+    end
+end
+
+function FlightMap_FixMagnifyCartographerAnchor(tooltip)
+    if not FlightMap_IsMagnifyActive() then
+        return;
+    end
+
+    local cartographerActive = FlightMap_IsCartographerActive();
+
+    local lookNFeelActive = cartographerActive and Cartographer_LookNFeel
+            and Cartographer:IsModuleActive(Cartographer_LookNFeel);
+
+    local shaguTweaksActive = IsAddOnLoaded("ShaguTweaks");
+
+    local worldMapWindowEnabled = shaguTweaksActive and ShaguTweaks_config
+            and ShaguTweaks_config["WorldMap Window"] == 1;
+
+    local OFFSET_X, OFFSET_Y;
+    if cartographerActive and lookNFeelActive then
+        OFFSET_X = 10;
+        OFFSET_Y = 31;
+    elseif cartographerActive then
+        OFFSET_X = 181;
+        OFFSET_Y = 31;
+    elseif shaguTweaksActive and not worldMapWindowEnabled then
+        OFFSET_X = 181;
+        OFFSET_Y = 31;
+    elseif not shaguTweaksActive then
+        OFFSET_X = 181;
+        OFFSET_Y = 31;
+    end
+
+    if not OFFSET_X then
+        return;
+    end
+
+    local meta = getmetatable(tooltip);
+    local idx = meta and meta.__index;
+    local nativeSetPoint;
+    if type(idx) == "table" then
+        nativeSetPoint = idx.SetPoint;
+    elseif type(idx) == "function" then
+        nativeSetPoint = idx(tooltip, "SetPoint");
+    end
+
+    if nativeSetPoint then
+        nativeSetPoint(tooltip, "BOTTOMLEFT", WorldMapFrame, "BOTTOMLEFT",
+                OFFSET_X, OFFSET_Y);
+    else
+        local saved = tooltip.SetPoint;
+        tooltip.SetPoint = nil;
+        tooltip:SetPoint("BOTTOMLEFT", WorldMapFrame, "BOTTOMLEFT",
+                OFFSET_X, OFFSET_Y);
+        tooltip.SetPoint = saved;
+    end
+
+    tooltip:SetFrameStrata("TOOLTIP");
+end
+
+do
+    local lMagnifyWatcher = CreateFrame("Frame");
+    lMagnifyWatcher:RegisterEvent("ADDON_LOADED");
+    lMagnifyWatcher:RegisterEvent("PLAYER_ENTERING_WORLD");
+    lMagnifyWatcher:SetScript("OnEvent", function()
+        if IsAddOnLoaded("Magnify") then
+            lMagnifyDetected = true;
+            lMagnifyWatcher:UnregisterAllEvents();
+        end
+    end);
+end
+
+-- TurtleWoW compatibility
 if not OptionsFrame_EnableCheckBox then
     function OptionsFrame_EnableCheckBox(checkbox, enable, checked)
         if not checkbox then
@@ -1317,4 +1481,22 @@ if not OptionsFrame_DisableCheckBox then
         OptionsFrame_EnableCheckBox(checkbox, nil,
                 checkbox and checkbox:GetChecked());
     end
+end
+
+do
+    local lShaguMapSizeWatcher = CreateFrame("Frame");
+    lShaguMapSizeWatcher:RegisterEvent("PLAYER_ENTERING_WORLD");
+    lShaguMapSizeWatcher:SetScript("OnEvent", function()
+        lShaguMapSizeWatcher:UnregisterAllEvents();
+
+        local origOnShow = WorldMapFrame:GetScript("OnShow");
+        WorldMapFrame:SetScript("OnShow", function()
+            if origOnShow then
+                origOnShow();
+            end
+            if FlightMap_IsMagnifyActive() then
+                FlightMap_FixShaguMapSize();
+            end
+        end);
+    end);
 end

@@ -5,7 +5,7 @@
 ## Version: 1.14
 ## SavedVariables: FlightMap
 ## SavedVariablesPerCharacter: FlightMapChar
-## OptionalDeps: myAddOns, Sea, UnitXP_SP3_Addon
+## OptionalDeps: myAddOns, Sea, UnitXP_SP3_Addon, Cartographer, Magnify, ShaguTweaks
 FlightMapUtil.lua
 FlightMap.xml
 FlightMapTimes.xml
