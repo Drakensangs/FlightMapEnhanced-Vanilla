@@ -1283,3 +1283,38 @@ do
         end
     end);
 end
+
+if not OptionsFrame_EnableCheckBox then
+    function OptionsFrame_EnableCheckBox(checkbox, enable, checked)
+        if not checkbox then
+            return;
+        end
+
+        if enable then
+            checkbox:Enable();
+        else
+            checkbox:Disable();
+        end
+        checkbox:SetChecked(checked);
+
+        local name = checkbox.GetName and checkbox:GetName();
+        local text = name and getglobal(name .. "Text");
+        if text then
+            local color = enable and NORMAL_FONT_COLOR or GRAY_FONT_COLOR;
+            if color then
+                text:SetTextColor(color.r, color.g, color.b);
+            elseif enable then
+                text:SetTextColor(1, 1, 1);
+            else
+                text:SetTextColor(0.5, 0.5, 0.5);
+            end
+        end
+    end
+end
+
+if not OptionsFrame_DisableCheckBox then
+    function OptionsFrame_DisableCheckBox(checkbox)
+        OptionsFrame_EnableCheckBox(checkbox, nil,
+                checkbox and checkbox:GetChecked());
+    end
+end
