@@ -7,9 +7,6 @@
 -- the condition that the licensee accepts all responsibility and liability
 -- for any damage that may arise from the use of this AddOn.
 
--- Version number
-FLIGHTMAP_VERSION   = "1.14";
-
 -- Maximum lines to draw at once
 FLIGHTMAP_MAX_PATHS = 15;
 
@@ -107,47 +104,14 @@ FLIGHTMAP_DISMOUNTS = {
   ["Interface\\Icons\\Ability_Mount_WhiteTiger"] = 1,
 }
 
--- Cache for faction lookup (avoid repeated UnitFactionGroup calls)
+-- Cache for faction lookup (faction never changes mid-session on 1.12.1)
 local lFactionCache = nil;
-local lFactionCacheTime = 0;
 
 -- Cache for frame references (avoid repeated getglobal calls)
 local lPOIButtonCache = {};
 local lPathFrameCache = {};
 
 ------------------ Data access functions ------------------
-
-local function lStripPoint(factionSV, point)
-    if not factionSV then return; end
-    for k, v in pairs(factionSV) do
-        if v.Costs   then v.Costs[point]   = nil; end
-        if v.Flights then v.Flights[point] = nil; end
-    end
-    factionSV[point] = nil;
-end
-
--- Default option settings (also declared in Defaults.lua; this copy
--- is used as a fallback if Defaults.lua hasn't set them yet)
-FLIGHTMAP_DEFAULT_OPTS = FLIGHTMAP_DEFAULT_OPTS or {
-    showPaths = true,
-    showPOIs = true,
-    showAllInfo = false,
-    showCosts = true,
-    showTimes = true,
-    showDestinations = true,
-    showMultiHop = true,
-    showZoneTooltip = true,
-    showContinentPOIs = true,
-    autoDismount = true,
-    showPOITooltips = true,
-    showLevelRanges = true,
-    notifyTaskbar = true,
-    notifySound = false,
-    fontSize = 12,
-    timerPos = { point = "TOP", x = 0, y = -11 },
-    lockFlightTimes = false,
-    showMinimapButton = true,
-};
 
 -- Strip saved overrides that are identical to (or within 1s of) the
 -- built-in defaults, so only genuine differences occupy SavedVariables.
@@ -232,41 +196,18 @@ local function lSetDefaultData()
         end
     end
 
-    if FlightMap.Knowledge then
-        for charKey, nodes in pairs(FlightMap.Knowledge) do
-            if not FlightMapChar.Knowledge[charKey] then
-                FlightMapChar.Knowledge[charKey] = nodes;
-            end
-        end
-        FlightMap.Knowledge = nil;
-    end
-    if FlightMap.Opts then
-        if not FlightMapChar.Opts then
-            FlightMapChar.Opts = FlightMap.Opts;
-        end
-        FlightMap.Opts = nil;
-    end
-
-    -- Remove stale patch data
-    lStripPoint(FlightMap[FLIGHTMAP_HORDE],    "1:461:226");  -- Valor's Rest (Horde)
-    lStripPoint(FlightMap[FLIGHTMAP_ALLIANCE], "1:463:223");  -- Valor's Rest (Alliance)
-    lStripPoint(FlightMap[FLIGHTMAP_ALLIANCE], "1:552:793");  -- Misplaced Moonglade
-
     -- Strip redundant saved data that matches built-in defaults
     lStripDefaults(FlightMap[FLIGHTMAP_HORDE],    FLIGHTMAP_HORDE_FLIGHTS);
     lStripDefaults(FlightMap[FLIGHTMAP_ALLIANCE], FLIGHTMAP_ALLIANCE_FLIGHTS);
 
     -- Rebuild the session map now that overrides are clean
     FlightMapUtil.resetFlightMapCache();
-
-    -- Clean up very old format fields
-    FlightMap.Locs  = nil;
-    FlightMap.Times = nil;
 end
 
 -- Learn about the currently open taxi map.
 -- Only writes to SavedVariables when a value differs from the built-in default.
 local function lLearnTaxiNode()
+    if FlightMapChar and FlightMapChar.Opts and FlightMapChar.Opts.lockFlightTimes then return; end
     local map     = FlightMapUtil.getFlightMap();
     local faction = UnitFactionGroup("player");
     local sv      = FlightMapUtil.lGetOverrides(faction);
@@ -454,14 +395,11 @@ end
 
 ------------------ Miscellaneous utility ------------------
 
--- Cached faction lookup with time decay (60 second cache)
+-- Cached faction lookup (faction never changes mid-session on 1.12.1)
 local function lGetPlayerFaction()
-    local currentTime = GetTime();
-    if lFactionCache and (currentTime - lFactionCacheTime) < 60 then
-        return lFactionCache;
+    if not lFactionCache then
+        lFactionCache = UnitFactionGroup("player");
     end
-    lFactionCache = UnitFactionGroup("player");
-    lFactionCacheTime = currentTime;
     return lFactionCache;
 end
 
@@ -542,7 +480,7 @@ local function lAddFlightsForNode(tooltip, node, prefix, source)
             local islocal = (not data.Routes or not data.Routes[dest]);
             local destData = map[dest];
             if destData and (islocal or FlightMapChar.Opts.showMultiHop) then
-                local name, _ = FlightMapUtil.getNameAndZone(destData.Name);
+                local name = (FlightMapUtil.getNameAndZone(destData.Name));
                 local cost = data.Costs[dest];
                 local extra = lFormatExtra(cost, secs);
                 if FlightMapUtil.knownNode(dest) then
@@ -663,7 +601,7 @@ local function lShowNodePOI(node, data, space, num)
 
     if lCloseToExistingPOI(x, y) then return false; end
 
-    local name, _ = FlightMapUtil.getNameAndZone(data.Name);
+    local name = (FlightMapUtil.getNameAndZone(data.Name));
     
     local button = lPOIButtonCache[num];
     if not button then
@@ -779,8 +717,8 @@ local function lDrawFlightLines(zoneName)
 end
 
 -- Last drawn info for tooltip
-lFM_CurrentZone = nil;
-lFM_CurrentArea = nil;
+local lFM_CurrentZone = nil;
+local lFM_CurrentArea = nil;
 local lFM_OldUpdate = function() end;
 
 -- Replacement function to draw all the extra goodies of FlightMap
@@ -814,7 +752,7 @@ end
 function FlightMapPOIButton_OnEnter()
     if not FlightMapChar.Opts.showPOITooltips then return; end
     local x, y = this:GetCenter();
-    local parentX, parentY = WorldMapDetailFrame:GetCenter();
+    local parentX = WorldMapDetailFrame:GetCenter();
     if (x > parentX) then
         WorldMapTooltip:SetOwner(this, "ANCHOR_LEFT");
     else
@@ -847,11 +785,6 @@ function FlightMap_OnSlashCmd(args)
         DEFAULT_CHAT_FRAME:AddMessage(
             FLIGHTMAP_TIMESLOCKED[FlightMapChar.Opts.lockFlightTimes],
             1.0, 1.0, 1.0);
-    elseif args == FLIGHTMAP_GETHELP then
-        for cmd, desc in FLIGHTMAP_SUBCOMMANDS do
-            DEFAULT_CHAT_FRAME:AddMessage("|cffcc9010" .. cmd .. "|r " .. desc,
-                1.0, 1.0, 1.0);
-        end
     elseif (FlightMapOptionsFrame:IsVisible()) then
         HideUIPanel(FlightMapOptionsFrame);
     else
@@ -903,9 +836,7 @@ function FlightMap_OnEvent(event)
         if (myAddOnsFrame_Register) then
             myAddOnsFrame_Register({
                 name         = "FlightMap",
-                version      = FLIGHTMAP_VERSION,
-                releaseDate  = FLIGHTMAP_RELEASE,
-                author       = "Original addon: Dhask; Enhanced version: Drakensangs",
+                author       = "Original: Dhask; Enhanced: Drakensangs",
                 category     = MYADDONS_CATEGORY_MAP,
                 optionsframe = "FlightMapOptionsFrame",
             });
@@ -1096,33 +1027,23 @@ function FlightMap_UpdateTooltipFont()
 	if FlightMap and FlightMapChar.Opts and FlightMapChar.Opts.fontSize then
 	    size = FlightMapChar.Opts.fontSize;
 	end
-	
-    local maxLines = 30;
-    for i = 1, maxLines do
-        local left = getglobal("FlightMapTooltipTextLeft" .. i)
-        if left and left.SetFont then
-		   left:SetFont("Fonts\\FRIZQT__.TTF", size) 
-		end
-        local right = getglobal("FlightMapTooltipTextRight" .. i)
-		if right and right.SetFont then
-		    right:SetFont("Fonts\\FRIZQT__.TTF", size)
-		end
+
+    local i = 1;
+    while true do
+        local left  = getglobal("FlightMapTooltipTextLeft"  .. i);
+        local right = getglobal("FlightMapTooltipTextRight" .. i);
+        if not left and not right then break; end
+        if left  and left.SetFont  then left:SetFont("Fonts\\FRIZQT__.TTF",  size); end
+        if right and right.SetFont then right:SetFont("Fonts\\FRIZQT__.TTF", size); end
+        i = i + 1;
     end
 end
 
-if hooksecurefunc then
-    hooksecurefunc("FlightMap_WorldMapButton_OnUpdate", function()
-        if FlightMap and FlightMapChar.Opts then
-            FlightMap_UpdateTooltipFont();
-        end
-    end);
-else
-    local _old_WorldMapButton_OnUpdate = FlightMap_WorldMapButton_OnUpdate;
-    function FlightMap_WorldMapButton_OnUpdate(arg1)
-        _old_WorldMapButton_OnUpdate(arg1);
-        if FlightMap and FlightMapChar.Opts then
-            FlightMap_UpdateTooltipFont();
-        end
+local _old_WorldMapButton_OnUpdate = FlightMap_WorldMapButton_OnUpdate;
+function FlightMap_WorldMapButton_OnUpdate(arg1)
+    _old_WorldMapButton_OnUpdate(arg1);
+    if FlightMap and FlightMapChar.Opts then
+        FlightMap_UpdateTooltipFont();
     end
 end
 ----------------- Minimap Button -----------------
@@ -1189,7 +1110,9 @@ function FlightMapMinimapButton_OnMouseUp(button)
         FlightMapMinimapButton:SetScript("OnUpdate", nil);
         lUpdateMinimapButtonPosition();
     elseif button == "LeftButton" then
-        if IsControlKeyDown() then
+        if IsShiftKeyDown() then
+            FlightMap_OnSlashCmd(FLIGHTMAP_RESET);
+        elseif IsControlKeyDown() then
             FlightMapTaxi_ShowContinent();
         else
             if FlightMapOptionsFrame:IsVisible() then
@@ -1206,6 +1129,7 @@ function FlightMapMinimapButton_OnEnter()
     GameTooltip:SetText("FlightMap");
     GameTooltip:AddLine(FLIGHTMAP_MINIMAP_TIP1, 1, 1, 1);
     GameTooltip:AddLine(FLIGHTMAP_MINIMAP_TIP3, 1, 1, 1);
+    GameTooltip:AddLine(FLIGHTMAP_MINIMAP_TIP4, 1, 1, 1);
     GameTooltip:AddLine(FLIGHTMAP_MINIMAP_TIP2, 1, 1, 1);
     GameTooltip:Show();
 end
@@ -1254,6 +1178,7 @@ local function FlightMap_ApplypfUISkin()
         "FlightMapOptionsFrameOpt13", "FlightMapOptionsFrameOpt14",
         "FlightMapOptionsFrameOpt15", "FlightMapOptionsFrameOpt16",
         "FlightMapOptionsFrameOpt17", "FlightMapOptionsFrameOpt18",
+        "FlightMapOptionsFrameOpt19",
     };
     for _, name in ipairs(checkboxes) do
         local cb = getglobal(name);

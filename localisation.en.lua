@@ -77,22 +77,10 @@ FLIGHTMAP_CONFIRM_TIME  = " This flight will take ";
 FLIGHTMAP_RESET         = "reset";
 FLIGHTMAP_SHOWMAP       = "open";
 FLIGHTMAP_LOCKTIMES     = "lock";
-FLIGHTMAP_GETHELP       = "help";   -- TODO translate
 
--- Help text        TODO translate
+-- Help text
 FLIGHTMAP_TIMER_HELP    =
     "Hold down SHIFT and drag the timer bar to reposition.";
-FLIGHTMAP_SUBCOMMANDS   = {
-    [FLIGHTMAP_RESET]       = "Reset timer bar position",
-    [FLIGHTMAP_SHOWMAP]     = "Open flight map window",
-    [FLIGHTMAP_GETHELP]     = "Show this text",
-};
-
--- Locked/unlocked status
-FLIGHTMAP_TIMESLOCKED   = {
-    [true] = "Flight times will no longer be recorded.",
-    [false] = "Flight times will now be recorded.",
-};
 
 -- Option strings
 FLIGHTMAP_OPTIONS_CLOSE = "Close";
@@ -119,11 +107,57 @@ FLIGHTMAP_OPTIONS[13] = {   -- Option 13: POI tooltips
     option = "showPOITooltips",
     tooltip = "Show a tooltip when hovering over a flight master icon on the map.",
 };
+FLIGHTMAP_OPTIONS[3] = {   -- Option 3: Unknown masters
+    label = "Show unknown flights",
+    option = "showAllInfo",
+    tooltip = "Show all data, even for unvisited flight masters.",
+};
+FLIGHTMAP_OPTIONS[4] = {   -- Option 4: Auto-Dismount
+    label = "Auto dismount",
+    option = "autoDismount",
+    tooltip = "Automatically dismount when speaking to a flight master.",
+};
+FLIGHTMAP_OPTIONS[5] = {   -- Option 5: flight timers
+    label = "In-flight timers",
+    option = "useTimer",
+    tooltip = "Enable/disable the flight duration meter.",
+};
+FLIGHTMAP_OPTIONS[6] = {   -- Option 6: Show flight destinations
+    label = "Show destinations",
+    option = "showDestinations",
+    tooltip = "Show flight destinations on tooltips.",
+    children = {7, 8, 9},
+};
+FLIGHTMAP_OPTIONS[7] = {   -- Option 7: Show multi-hop destinations
+    label = "Including multi-hop",
+    option = "showMultiHop",
+    tooltip = "Show multi-hop destinations on tooltips.",
+};
+FLIGHTMAP_OPTIONS[8] = {   -- Option 8: Show flight times
+    label = "With flight times",
+    option = "showTimes",
+    tooltip = "Show flight times on tooltips.",
+};
+FLIGHTMAP_OPTIONS[9] = {   -- Option 9: Show flight costs
+    label = "With flight costs",
+    option = "showCosts",
+    tooltip = "Show flight costs on tooltips.",
+};
+FLIGHTMAP_OPTIONS[10] = {   -- Option 10: Taxi window extras
+    label = "Enhanced flight window",
+    option = "fullTaxiMap",
+    tooltip = "Show flight network on flight selection window.",
+};
+FLIGHTMAP_OPTIONS[11] = {   -- Option 11: Confirm flight destinations
+    label = "Confirm flights",
+    option = "confirmFlights",
+    tooltip = "Prompt for confirmation before taking a flight.",
+};
 FLIGHTMAP_OPTIONS[14] = {   -- Option 14: zone tooltip
     label = "Show zone tooltip",
     option = "showZoneTooltip",
-    children = {15},
     tooltip = "Show a tooltip for the zone when hovering over the continent map.",
+    children = {15},
 };
 FLIGHTMAP_OPTIONS[15] = {   -- Option 15: zone level ranges
     label = "Show zone level ranges",
@@ -140,70 +174,24 @@ FLIGHTMAP_OPTIONS[17] = {   -- Option 17: UnitXP notify sound
     option = "notifySound",
     tooltip = "Play a system sound on arrival.",
 };
-
-FLIGHTMAP_OPTIONS[3] = {   -- Option 3: Unknown masters
-    label = "Show unknown flights",
-    option = "showAllInfo",
-    tooltip = "Show all data, even for unvisited flight masters.",
-};
-FLIGHTMAP_OPTIONS[4] = {   -- Option 4: Auto-Dismount
-    label = "Auto dismount",
-    option = "autoDismount",
-    tooltip = "Automatically dismount when speaking to a flight master",
-};
-FLIGHTMAP_OPTIONS[5] = {   -- Option 5: flight timers
-    label = "In-flight timers",
-    option = "useTimer",
-    tooltip = "Enable/disable the flight duration meter.",
-};
-
-FLIGHTMAP_OPTIONS[6] = {   -- Option 6: Show flight destinations
-    label = "Show destinations",
-    option = "showDestinations",
-    tooltip = "Show flight destinations on tooltips",
-    children = {7, 8, 9},
-};
-FLIGHTMAP_OPTIONS[7] = {   -- Option 7: Show multi-hop destinations
-    label = "Including multi-hop",
-    option = "showMultiHop",
-    tooltip = "Show multi-hop destinations on tooltips",
-};
-FLIGHTMAP_OPTIONS[8] = {   -- Option 8: Show flight times
-    label = "With flight times",
-    option = "showTimes",
-    tooltip = "Show flight times on tooltips.",
-};
-FLIGHTMAP_OPTIONS[9] = {   -- Option 9: Show flight costs
-    label = "With flight costs",
-    option = "showCosts",
-    tooltip = "Show flight costs on tooltips.",
-};
-FLIGHTMAP_OPTIONS[10] = {   -- Option 10: Taxi window extras
-    label = "Enhanced flight window",
-    option = "fullTaxiMap",
-    tooltip = "Show flight network on flight selection window",
-};
 FLIGHTMAP_OPTIONS[18] = {   -- Option 18: Minimap button
     label = "Minimap button",
     option = "showMinimapButton",
     tooltip = "Show a FlightMap button on the minimap.",
 };
-FLIGHTMAP_OPTIONS[11] = {   -- Option 11: Confirm flight destinations
-    label = "Confirm flights",
-    option = "confirmFlights",
-    tooltip = "Prompt for confirmation before taking a flight",
+FLIGHTMAP_OPTIONS[19] = {   -- Option 19: Lock flight times
+    label = "Lock flight times",
+    option = "lockFlightTimes",
+    tooltip = "Prevents the addon from writing new/different flight data to the savedvariables.",
 };
 
 -- Dynamic UI strings (used in FlightMap.lua for runtime-created controls)
-FLIGHTMAP_SHOW_ZONE_TOOLTIP             = "Show zone tooltip";
-FLIGHTMAP_SHOW_ZONE_TOOLTIP_TIP         = "Show a tooltip for the zone when hovering over the continent map.";
-FLIGHTMAP_SHOW_ZONE_LEVEL_RANGES        = "Show zone level ranges";
-FLIGHTMAP_SHOW_ZONE_LEVEL_RANGES_TIP    = "Display the recommended level range for each zone.";
 FLIGHTMAP_TOOLTIP_FONT_SIZE             = "Tooltip font size";
 FLIGHTMAP_TOOLTIP_FONT_SIZE_TIP         = "Adjusts the font size of the FlightMap tooltip text.";
 FLIGHTMAP_MINIMAP_TIP1                  = "Left click to open FlightMap menu.";
 FLIGHTMAP_MINIMAP_TIP2                  = "Hold right click to move minimap button.";
 FLIGHTMAP_MINIMAP_TIP3                  = "Ctrl left click to open flight map.";
+FLIGHTMAP_MINIMAP_TIP4                  = "Shift left click to reset timer bar position.";
 
 -- These constants determine how "Town, Zone" strings look.
 -- SEP_STRING is what separates Town from Zone.  SEP_POSTAMBLE

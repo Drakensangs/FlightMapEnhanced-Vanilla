@@ -1,14 +1,14 @@
--- Korean translations
+-- Korean localisation
 
 if (GetLocale() == "koKR") then
     BINDING_HEADER_FLIGHTMAP = "FlightMap";
-    BINDING_NAME_FLIGHTMAP   = "Show flight map";
+    BINDING_NAME_FLIGHTMAP   = "비행 지도 표시";
 
     FLIGHTMAP_NAME          = "FlightMap";
-    FLIGHTMAP_DESCRIPTION   = "Flight path info on the World Map";
+    FLIGHTMAP_DESCRIPTION   = "세계 지도에서 비행 경로 정보 표시";
     FLIGHTMAP_ALLIANCE      = "얼라이언스";
     FLIGHTMAP_HORDE         = "호드";
-    FLIGHTMAP_CONTESTED     = "Contested";
+    FLIGHTMAP_CONTESTED     = "분쟁 지역";
 
     -- Zone names
     FLIGHTMAP_MOONGLADE     = "달의 숲";
@@ -52,51 +52,40 @@ if (GetLocale() == "koKR") then
     FLIGHTMAP_TELDRASSIL    = "텔드랏실";
     FLIGHTMAP_DEADWINDPASS  = "죽음의 고개";
     FLIGHTMAP_ORGRIMMAR     = "오그리마";
-    FLIGHTMAP_UNDERCITY     = "언더시티";
     FLIGHTMAP_THUNDERBLUFF  = "썬더블러프";
+    FLIGHTMAP_UNDERCITY     = "언더시티";
     FLIGHTMAP_IRONFORGE     = "아이언포지";
     FLIGHTMAP_STORMWIND     = "스톰윈드";
+    FLIGHTMAP_DARNASSUS     = "다르나서스";
 
     -- General strings
     FLIGHTMAP_TIMING        = "(측정중)";
-    FLIGHTMAP_LEVELS        = "|cff00ff00레벨: %d - %d|r";
-    FLIGHTMAP_NOFLIGHTS     = "None known!";    -- TODO translate
-    FLIGHTMAP_NOT_KNOWN     = "(Not known)";    -- TODO translate
-    FLIGHTMAP_NO_COST       = "Free";           -- TODO translate
-    FLIGHTMAP_MONEY_GOLD    = "g";              -- TODO translate
-    FLIGHTMAP_MONEY_SILVER  = "s";              -- TODO translate
-    FLIGHTMAP_MONEY_COPPER  = "c";              -- TODO translate
-    FLIGHTMAP_FLIGHTTIME    = "Flight time: ";  -- TODO translate
-    FLIGHTMAP_QUICKEST      = "Fastest route";  -- TODO translate
-    FLIGHTMAP_TOTAL_TIME    = "Total time";     -- TODO translate
-    FLIGHTMAP_VIA           = "Via ";           -- TODO translate
-    FLIGHTMAP_CONFIRM       = "Are you sure you wish to fly to %s?%s";
-    FLIGHTMAP_CONFIRM_TIME  = " This flight will take ";
+    FLIGHTMAP_LEVELS        = "레벨: %d - %d";
+    FLIGHTMAP_NOFLIGHTS     = "알려진 경로 없음!";
+    FLIGHTMAP_NOT_KNOWN     = "(알 수 없음)";
+    FLIGHTMAP_NO_COST       = "무료";
+    FLIGHTMAP_MONEY_GOLD    = "금";
+    FLIGHTMAP_MONEY_SILVER  = "은";
+    FLIGHTMAP_MONEY_COPPER  = "동";
+    FLIGHTMAP_FLIGHTTIME    = "비행 시간: ";
+    FLIGHTMAP_QUICKEST      = "가장 빠른 경로";
+    FLIGHTMAP_TOTAL_TIME    = "총 소요 시간";
+    FLIGHTMAP_VIA           = "경유 ";
+    FLIGHTMAP_CONFIRM       = "%s(으)로 비행하시겠습니까?%s";
+    FLIGHTMAP_CONFIRM_TIME  = " 이 비행은 소요 시간: ";
 
     -- Command strings
-    FLIGHTMAP_RESET         = "reset";  -- TODO translate
-    FLIGHTMAP_SHOWMAP       = "open";   -- TODO translate
-    FLIGHTMAP_LOCKTIMES     = "lock";   -- TODO translate
-    FLIGHTMAP_GETHELP       = "help";   -- TODO translate
+    FLIGHTMAP_RESET         = "다시 놓기";
+    FLIGHTMAP_SHOWMAP       = "열려 있는";
+    FLIGHTMAP_LOCKTIMES     = "잠그다";
 
-    -- Help text        TODO translate
+    -- Help text
     FLIGHTMAP_TIMER_HELP    =
-        "Hold down SHIFT and drag the timer bar to reposition.";
-    FLIGHTMAP_SUBCOMMANDS   = {
-        [FLIGHTMAP_RESET]       = "Reset timer bar position",
-        [FLIGHTMAP_SHOWMAP]     = "Open flight map window",
-        [FLIGHTMAP_GETHELP]     = "Show this text",
-    };
-
-    -- Locked/unlocked status           TODO translate
-    FLIGHTMAP_TIMESLOCKED   = {
-        [true] = "Flight times will no longer be recorded.",
-        [false] = "Flight times will now be recorded.",
-    };
+        "SHIFT 키를 누른 채 타이머 바를 드래그하여 위치를 조정하세요.";
 
     -- Option strings
-    FLIGHTMAP_OPTIONS_CLOSE = "Close";             -- TODO translate
-    FLIGHTMAP_OPTIONS_TITLE = "FlightMap Options"; -- TODO translate
+    FLIGHTMAP_OPTIONS_CLOSE = "닫기";
+    FLIGHTMAP_OPTIONS_TITLE = "FlightMap 옵션";
     FLIGHTMAP_OPTIONS = {};
     FLIGHTMAP_OPTIONS[1] = {   -- Option 1: flight path lines
         label = "비행 경로",
@@ -108,7 +97,6 @@ if (GetLocale() == "koKR") then
         option = "showPOIs",
         tooltip = "비행장의 위치를 아이콘으로 표시해줍니다.",
         children = {12, 13},
-
     };
     FLIGHTMAP_OPTIONS[12] = {   -- Option 12: continent POI icons
         label = "하늘길 대륜 아이콘 (대륜)",
@@ -116,16 +104,61 @@ if (GetLocale() == "koKR") then
         tooltip = "대륜 지도에 하늘길 대륜 아이콘을 표시합니다.",
     };
     FLIGHTMAP_OPTIONS[13] = {   -- Option 13: POI tooltips
-        label = "하늘길 대련 툴팁",
+        label = "하늘길 대륜 툴팁",
         option = "showPOITooltips",
-        tooltip = "지도에서 하늘길 대련 아이콘에 마우스를 올리면 툴팁을 표시합니다.",
+        tooltip = "지도에서 하늘길 대륜 아이콘에 마우스를 올리면 툴팁을 표시합니다.",
     };
-
+    FLIGHTMAP_OPTIONS[3] = {   -- Option 3: Unknown masters
+        label = "모든 정보 보기",
+        option = "showAllInfo",
+        tooltip = "비행경로를 알 수 없어도 모두 보여줍니다.",
+    };
+    FLIGHTMAP_OPTIONS[4] = {   -- Option 4: Auto-Dismount
+        label = "자동 하차",
+        option = "autoDismount",
+        tooltip = "비행 관리인과 대화할 때 자동으로 탈것에서 내립니다.",
+    };
+    FLIGHTMAP_OPTIONS[5] = {   -- Option 5: flight timers
+        label = "비행 시간 타이머",
+        option = "useTimer",
+        tooltip = "비행 시간을 잽니다.",
+    };
+    FLIGHTMAP_OPTIONS[6] = {   -- Option 6: Show flight destinations
+        label = "목적지 표시",
+        option = "showDestinations",
+        tooltip = "툴팁에 비행 목적지를 표시합니다.",
+        children = {7, 8, 9},
+    };
+    FLIGHTMAP_OPTIONS[7] = {   -- Option 7: Show multi-hop destinations
+        label = "경유 목적지 포함",
+        option = "showMultiHop",
+        tooltip = "툴팁에 경유 목적지를 표시합니다.",
+    };
+    FLIGHTMAP_OPTIONS[8] = {   -- Option 8: Show flight times
+        label = "비행 시간 표시",
+        option = "showTimes",
+        tooltip = "비행 시간을 툴팁에 보여줍니다.",
+    };
+    FLIGHTMAP_OPTIONS[9] = {   -- Option 9: Show flight costs
+        label = "비행료 표시",
+        option = "showCosts",
+        tooltip = "비행료를 툴팁에 보여줍니다.",
+    };
+    FLIGHTMAP_OPTIONS[10] = {   -- Option 10: Taxi window extras
+        label = "전체 비행 지도",
+        option = "fullTaxiMap",
+        tooltip = "비행 창 지도에서 도달할 수 없는 노드를 표시합니다.",
+    };
+    FLIGHTMAP_OPTIONS[11] = {   -- Option 11: Confirm flight destinations
+        label = "비행 확인",
+        option = "confirmFlights",
+        tooltip = "비행 전에 확인을 요청합니다.",
+    };
     FLIGHTMAP_OPTIONS[14] = {   -- Option 14: zone tooltip
         label = "지역 툴팁 표시",
         option = "showZoneTooltip",
-    children = {15},
         tooltip = "대륙 지도에서 지역 툴팁을 표시합니다.",
+		children = {15},
     };
     FLIGHTMAP_OPTIONS[15] = {   -- Option 15: zone level ranges
         label = "지역 레벨 범위 표시",
@@ -142,73 +175,25 @@ if (GetLocale() == "koKR") then
         option = "notifySound",
         tooltip = "도착 시 시스템 소리를 재생합니다.",
     };
-
-
-
-    FLIGHTMAP_OPTIONS[3] = {   -- Option 3: Unknown masters
-        label = "모든 정보 보기",
-        option = "showAllInfo",
-        tooltip = "비행경로를 알 수 없어도 모두 보여줍니다.",
-    };
-    FLIGHTMAP_OPTIONS[4] = {   -- Option 4: Auto-Dismount
-        label = "Auto dismount",
-        option = "autoDismount",
-        tooltip = "Automatically dismount when speaking to a flight master",
-    };
-    FLIGHTMAP_OPTIONS[5] = {   -- Option 5: flight timers
-        label = "비행 시간 타이머",
-        option = "useTimer",
-        tooltip = "비행 시간을 잽니다.",
-    };
-
-    FLIGHTMAP_OPTIONS[6] = {   -- Option 6: Show flight destinations
-        label = "Show destinations",
-        option = "showDestinations",
-        tooltip = "Show flight destinations on tooltips",
-        children = {7, 8, 9},
-    };
-    FLIGHTMAP_OPTIONS[7] = {   -- Option 7: Show multi-hop destinations
-        label = "Including multi-hop",
-        option = "showMultiHop",
-        tooltip = "Show multi-hop destinations on tooltips",
-    };
-    FLIGHTMAP_OPTIONS[8] = {   -- Option 8: Show flight times
-        label = "비행 시간 표시",
-        option = "showTimes",
-        tooltip = "비행 시간을 툴팁에 보여줍니다.",
-    };
-    FLIGHTMAP_OPTIONS[9] = {   -- Option 9: Show flight costs
-        label = "비행료 표시",
-        option = "showCosts",
-        tooltip = "비행료를 툴팁에 보여줍니다.",
-    };
-    FLIGHTMAP_OPTIONS[10] = {   -- Option 10: Taxi window extras
-        label = "Full flight map",
-        option = "fullTaxiMap",
-        tooltip = "Show unreachable nodes on the taxi window map",
-    };
     FLIGHTMAP_OPTIONS[18] = {   -- Option 18: Minimap button
         label = "미니맵 버튼",
         option = "showMinimapButton",
         tooltip = "미니맵에 FlightMap 버튼을 표시합니다.",
     };
-    FLIGHTMAP_OPTIONS[11] = {   -- Option 11: Confirm flight destinations
-        label = "Confirm flights",
-        option = "confirmFlights",
-        tooltip = "Prompt for confirmation before taking a flight",
+    FLIGHTMAP_OPTIONS[19] = {   -- Option 19: Lock flight times
+        label = "비행 시간 잠금",
+        option = "lockFlightTimes",
+        tooltip = "애드온이 새로운 또는 다른 비행 데이터를 저장 변수에 기록하지 못하도록 합니다.",
     };
 
-FLIGHTMAP_SHOW_ZONE_TOOLTIP             = "지역 툴팁 표시";
-FLIGHTMAP_SHOW_ZONE_TOOLTIP_TIP         = "대륙 지도에서 마우스를 올리면 지역 툴팁을 표시합니다.";
-FLIGHTMAP_SHOW_ZONE_LEVEL_RANGES        = "지역 레벨 범위 표시";
-FLIGHTMAP_SHOW_ZONE_LEVEL_RANGES_TIP    = "각 지역의 권장 레벨 범위를 표시합니다.";
-FLIGHTMAP_TOOLTIP_FONT_SIZE             = "휴정 글구 크기";
-FLIGHTMAP_TOOLTIP_FONT_SIZE_TIP         = "FlightMap 휴정 텍스트의 글구 크기를 조정합니다.";
-FLIGHTMAP_MINIMAP_TIP1                  = "마우스 왼쪽 버튼을 클릭하여 FlightMap 메뉴를 엽니다.";
-FLIGHTMAP_MINIMAP_TIP2                  = "마우스 오른쪽 버튼을 길게 눌러 미니맵 버튼을 이동하세요.";
-FLIGHTMAP_MINIMAP_TIP3                  = "Ctrl 키를 누른 상태에서 마우스 왼쪽 버튼을 클릭하여 비행 경로 지도를 엽니다.";
+    FLIGHTMAP_TOOLTIP_FONT_SIZE             = "툴팁 글꼴 크기";
+    FLIGHTMAP_TOOLTIP_FONT_SIZE_TIP         = "FlightMap 툴팁 텍스트의 글꼴 크기를 조정합니다.";
+    FLIGHTMAP_MINIMAP_TIP1                  = "마우스 왼쪽 버튼을 클릭하여 FlightMap 메뉴를 엽니다.";
+    FLIGHTMAP_MINIMAP_TIP2                  = "마우스 오른쪽 버튼을 길게 눌러 미니맵 버튼을 이동하세요.";
+    FLIGHTMAP_MINIMAP_TIP3                  = "Ctrl 키를 누른 상태에서 마우스 왼쪽 버튼을 클릭하여 비행 경로 지도를 엽니다.";
+    FLIGHTMAP_MINIMAP_TIP4                  = "Shift 키를 누른 상태에서 마우스 왼쪽 버튼을 클릭하여 타이머 바 위치를 초기화합니다.";
 
--- These constants determine how "Town (Zone)" strings look.
+    -- These constants determine how "Town (Zone)" strings look.
     -- SEP_STRING is what separates Town from Zone.  SEP_POSTAMBLE
     -- is anything that is after Zone.
     FLIGHTMAP_SEP_STRING    = " (";

@@ -1,70 +1,66 @@
--- Translatable strings, French version
-
--- XXX This is not yet translated!  If you wish to translate it,
---     please send a copy to me via <bje@apnic.net> so I can include
---     it in the next release!
+-- French localisation
 
 if (GetLocale() == "frFR") then
-    BINDING_HEADER_FLIGHTMAP = "FlightMap";
-    BINDING_NAME_FLIGHTMAP   = "Show flight map";
+    BINDING_HEADER_FLIGHTMAP = "Carte de vol";
+    BINDING_NAME_FLIGHTMAP   = "Afficher la carte de vol";
 
-    FLIGHTMAP_NAME          = "FlightMap";
+    FLIGHTMAP_NAME          = "Carte de vol";
     FLIGHTMAP_DESCRIPTION   = "Informations sur les vols";
     FLIGHTMAP_ALLIANCE      = "Alliance";
     FLIGHTMAP_HORDE         = "Horde";
-    FLIGHTMAP_CONTESTED     = "Contest\195\130";
+    FLIGHTMAP_CONTESTED     = "Contesté";
 
     -- Zone names
-    FLIGHTMAP_MOONGLADE     = "Reflet-de-Lune (Moonglade)";
-    FLIGHTMAP_ELWYNN        = "For\195\170t d'Elwynn";
+    FLIGHTMAP_MOONGLADE     = "Reflet-de-Lune";
+    FLIGHTMAP_ELWYNN        = "Forêt d'Elwynn";
     FLIGHTMAP_DUNMOROGH     = "Dun Morogh";
-    FLIGHTMAP_TIRISFAL      = "Clairi\195\168res de Tirisfal";
+    FLIGHTMAP_TIRISFAL      = "Clairières de Tirisfal";
     FLIGHTMAP_LOCHMODAN     = "Loch Modan";
-    FLIGHTMAP_SILVERPINE    = "For\195\170t des Pins argent\195\169s (Silverpine Forest)";
-    FLIGHTMAP_WESTFALL      = "Marche de l'Ouest (Westfall)";
-    FLIGHTMAP_REDRIDGE      = "Les Carmines (Redridge Mts)";
-    FLIGHTMAP_DUSKWOOD      = "Bois de la p\195\169nombre (Duskwood)";
-    FLIGHTMAP_HILLSBRAD     = "Contreforts d'Hillsbrad";
-    FLIGHTMAP_WETLANDS      = "Les Paluns (Wetlands)";
+    FLIGHTMAP_SILVERPINE    = "Forêt des Pins argentés";
+    FLIGHTMAP_WESTFALL      = "La Marche de l'Ouest";
+    FLIGHTMAP_REDRIDGE      = "Les Carmines";
+    FLIGHTMAP_DUSKWOOD      = "Bois de la pénombre";
+    FLIGHTMAP_HILLSBRAD     = "Contreforts de Hautebrande";
+    FLIGHTMAP_WETLANDS      = "Les Paluns";
     FLIGHTMAP_ALTERAC       = "Montagnes d'Alterac";
-    FLIGHTMAP_ARATHI        = "Hautes-Terres d'Arathi";
-    FLIGHTMAP_STRANGLETHORN = "Vall\195\169e de Strangleronce (Stranglethorn Vale)";
-    FLIGHTMAP_BADLANDS      = "Terres ingrates (Badlands)";
-    FLIGHTMAP_SORROWS       = "Marais des Chagrins (Swamp of Sorrows)";
+    FLIGHTMAP_ARATHI        = "Hautes-terres d'Arathi";
+    FLIGHTMAP_STRANGLETHORN = "Vallée de Strangleronce";
+    FLIGHTMAP_BADLANDS      = "Terres Ingrates";
+    FLIGHTMAP_SORROWS       = "Marais des chagrins";
     FLIGHTMAP_HINTERLANDS   = "Les Hinterlands";
-    FLIGHTMAP_SEARINGGORGE  = "Gorges des Vents Br\195\187lants (Searing Gorge)";
-    FLIGHTMAP_BLASTEDLANDS  = "Terres foudroy\195\169es (Blasted Lands)";
+    FLIGHTMAP_SEARINGGORGE  = "Gorges des Vents brûlants";
+    FLIGHTMAP_BLASTEDLANDS  = "Terres Foudroyées";
     FLIGHTMAP_BURNINGSTEPPE = "Steppes ardentes";
-    FLIGHTMAP_WESTERNPLAGUE = "Maleterres de l'ouest (Western Plaguelands)";
-    FLIGHTMAP_EASTERNPLAGUE = "Maleterres de l'est (Eastern Plaguelands)";
+    FLIGHTMAP_WESTERNPLAGUE = "Maleterres de l'Ouest";
+    FLIGHTMAP_EASTERNPLAGUE = "Maleterres de l'Est";
     FLIGHTMAP_DUROTAR       = "Durotar";
     FLIGHTMAP_MULGORE       = "Mulgore";
-    FLIGHTMAP_DARKSHORE     = "Sombrivage (Darkshore)";
-    FLIGHTMAP_BARRENS       = "Les Tarides (the Barrens)";
-    FLIGHTMAP_STONETALON    = "Les Serres-Rocheuses (Stonetalon Mts)";
+    FLIGHTMAP_DARKSHORE     = "Sombrivage";
+    FLIGHTMAP_BARRENS       = "Les Tarides";
+    FLIGHTMAP_STONETALON    = "Les Serres-Rocheuses";
     FLIGHTMAP_ASHENVALE     = "Ashenvale";
-    FLIGHTMAP_1KNEEDLES     = "Mille pointes (Thousand Needles)";
-    FLIGHTMAP_DESOLACE      = "D\195\169solace";
-    FLIGHTMAP_DUSTWALLOW    = "Mar\195\169cage d'\195\130prefange (Dustwallow Marsh)";
-    FLIGHTMAP_FERALAS       = "Feralas";
+    FLIGHTMAP_1KNEEDLES     = "Mille pointes";
+    FLIGHTMAP_DESOLACE      = "Désolace";
+    FLIGHTMAP_DUSTWALLOW    = "Marécage d'Âprefange";
+    FLIGHTMAP_FERALAS       = "Féralas";
     FLIGHTMAP_TANARIS       = "Tanaris";
     FLIGHTMAP_AZSHARA       = "Azshara";
-    FLIGHTMAP_FELWOOD       = "Gangrebois (Felwood)";
-    FLIGHTMAP_UNGOROCRATER  = "Crat\195\168re d'Un'Goro";
+    FLIGHTMAP_FELWOOD       = "Gangrebois";
+    FLIGHTMAP_UNGOROCRATER  = "Cratère d'Un'Goro";
     FLIGHTMAP_SILITHUS      = "Silithus";
-    FLIGHTMAP_WINTERSPRING  = "Berceau-de-l'Hiver (Winterspring)";
+    FLIGHTMAP_WINTERSPRING  = "Berceau-de-l'Hiver";
     FLIGHTMAP_TELDRASSIL    = "Teldrassil";
-    FLIGHTMAP_DEADWINDPASS  = "D\195\169fil\195\169 de Deuillevent (Deadwind Pass)";
-    FLIGHTMAP_ORGRIMMAR     = "Orgrimmar";      -- TODO translate
-    FLIGHTMAP_THUNDERBLUFF  = "Thunder Bluff";  -- TODO translate
-    FLIGHTMAP_UNDERCITY     = "Undercity";
-    FLIGHTMAP_IRONFORGE     = "Ironforge";      -- TODO translate
-    FLIGHTMAP_STORMWIND     = "Cit\195\169 de Stormwind";
-    FLIGHTMAP_DARNASSUS     = "Darnassus";      -- TODO translate
+    FLIGHTMAP_DEADWINDPASS  = "Défilé de Deuillevent";
+    FLIGHTMAP_ORGRIMMAR     = "Orgrimmar";
+    FLIGHTMAP_THUNDERBLUFF  = "Pitons-du-Tonnerre";
+    FLIGHTMAP_UNDERCITY     = "Les Fossoyeuses";
+    FLIGHTMAP_IRONFORGE     = "Forgefer";
+    FLIGHTMAP_STORMWIND     = "Hurlevent";
+    FLIGHTMAP_DARNASSUS     = "Darnassus";
 
     -- General strings
-    FLIGHTMAP_TIMING        = "(Calcul)";
-    FLIGHTMAP_LEVELS        = "|cff00ff00Niveau de Zone: %d - %d|r";
+    FLIGHTMAP_TIMING        = "(calcul)";
+    FLIGHTMAP_LEVELS        = "Niveaux : %d - %d";
     FLIGHTMAP_NOFLIGHTS     = "Aucun connu!";
     FLIGHTMAP_NOT_KNOWN     = "(Inconnu)";
     FLIGHTMAP_NO_COST       = "Gratuit";
@@ -74,146 +70,130 @@ if (GetLocale() == "frFR") then
     FLIGHTMAP_FLIGHTTIME    = "Temps de vol: ";
     FLIGHTMAP_QUICKEST      = "Trajet le plus rapide";
     FLIGHTMAP_TOTAL_TIME    = "Temps total";
-    FLIGHTMAP_VIA           = "Via ";           -- TODO translate
+    FLIGHTMAP_VIA           = "Via ";
     FLIGHTMAP_CONFIRM       = "Voulez-vous vraiment rejoindre %s?%s";
     FLIGHTMAP_CONFIRM_TIME  = " Ce vol prendra ";
 
     -- Command strings
-    FLIGHTMAP_RESET         = "reset";  -- TODO translate
-    FLIGHTMAP_SHOWMAP       = "open";   -- TODO translate
-    FLIGHTMAP_LOCKTIMES     = "lock";   -- TODO translate
-    FLIGHTMAP_GETHELP       = "help";   -- TODO translate
+    FLIGHTMAP_RESET         = "réinitialiser";
+    FLIGHTMAP_SHOWMAP       = "ouvrir";
+    FLIGHTMAP_LOCKTIMES     = "verrouiller";
 
-    -- Help text        TODO translate
+    -- Help text
     FLIGHTMAP_TIMER_HELP    =
-        "Hold down SHIFT and drag the timer bar to reposition.";
-    FLIGHTMAP_SUBCOMMANDS   = {
-        [FLIGHTMAP_RESET]       = "Reset timer bar position",
-        [FLIGHTMAP_SHOWMAP]     = "Open flight map window",
-        [FLIGHTMAP_GETHELP]     = "Show this text",
-    };
-
-    -- Locked/unlocked status           TODO translate
-    FLIGHTMAP_TIMESLOCKED   = {
-        [true] = "Flight times will no longer be recorded.",
-        [false] = "Flight times will now be recorded.",
-    };
+        "Maintenez la touche MAJ enfoncée et faites glisser la barre du minuteur pour la repositionner.";
 
     -- Option strings
-    FLIGHTMAP_OPTIONS_CLOSE = "Close";             -- TODO translate
-    FLIGHTMAP_OPTIONS_TITLE = "FlightMap Options"; -- TODO translate
-    FLIGHTMAP_OPTIONS = {}
+    FLIGHTMAP_OPTIONS_CLOSE = "Fermer";
+    FLIGHTMAP_OPTIONS_TITLE = "Options FlightMap";
+    FLIGHTMAP_OPTIONS = {};
     FLIGHTMAP_OPTIONS[1] = {   -- Option 1: flight path lines
         label = "Lignes de trajets",
         option = "showPaths",
-        tooltip = "Dessine les trajets a\195\169riens sur la carte du monde.",
+        tooltip = "Dessine les trajets aériens sur la carte du monde.",
     };
     FLIGHTMAP_OPTIONS[2] = {   -- Option 2: extra POI buttons
-        label = "POIs pour M\195\162itres",
+        label = "IC de maîtres de vol",
         option = "showPOIs",
-        tooltip = "Affiche des bouttons POI suppl\195\169mentaites pour les m\195\162itre des cavaliers celestes.",
+        tooltip = "Affiche des icônes supplémentaires sur la carte du monde pour les maîtres de vol.",
         children = {12, 13},
-
     };
     FLIGHTMAP_OPTIONS[12] = {   -- Option 12: continent POI icons
-        label = "Ic9580nes de ma95|tres de vol (continent)",
+        label = "Icônes de maîtres de vol (continent)",
         option = "showContinentPOIs",
-        tooltip = "Afficher les ic9580nes des ma95|tres de vol sur les cartes de continent.",
+        tooltip = "Afficher les icônes des maîtres de vol sur les cartes de continent.",
     };
     FLIGHTMAP_OPTIONS[13] = {   -- Option 13: POI tooltips
         label = "Infobulle des maîtres de vol",
         option = "showPOITooltips",
         tooltip = "Afficher une infobulle au survol d'une icône de maître de vol.",
     };
-
-    FLIGHTMAP_OPTIONS[14] = {   -- Option 14: zone tooltip
-        label = "Afficher l'infobulle de zone",
-        option = "showZoneTooltip",
-    children = {15},
-        tooltip = "Afficher une infobulle pour la zone sur la carte du continent.",
-    };
-    FLIGHTMAP_OPTIONS[15] = {   -- Option 15: zone level ranges
-        label = "Niveaux de zone",
-        option = "showLevelRanges",
-        tooltip = "Afficher les niveaux recommandes pour chaque zone.",
-    };
-    FLIGHTMAP_OPTIONS[16] = {   -- Option 16: UnitXP notify taskbar
-        label = "Notif. : icone de barre des taches",
-        option = "notifyTaskbar",
-        tooltip = "Faire clignoter l'icone a l'atterrissage.",
-    };
-    FLIGHTMAP_OPTIONS[17] = {   -- Option 17: UnitXP notify sound
-        label = "Notif. : son systeme",
-        option = "notifySound",
-        tooltip = "Jouer un son systeme a l'atterrissage.",
-    };
-
-
-
-    FLIGHTMAP_OPTIONS[3] = {   -- Option 3: Unknown masters  (TODO translate)
-        label = "Show all info",
+    FLIGHTMAP_OPTIONS[3] = {   -- Option 3: Unknown masters
+        label = "Afficher toutes les infos",
         option = "showAllInfo",
-        tooltip = "Show all data, even for unvisited flight nodes.",
+        tooltip = "Afficher toutes les données, même pour les maîtres de vol non visités.",
     };
     FLIGHTMAP_OPTIONS[4] = {   -- Option 4: Auto-Dismount
-        label = "Auto dismount",
+        label = "Démonture automatique",
         option = "autoDismount",
-        tooltip = "Automatically dismount when speaking to a flight master",
+        tooltip = "Se démonter automatiquement en parlant à un maître de vol.",
     };
     FLIGHTMAP_OPTIONS[5] = {   -- Option 5: flight timers
         label = "Compteur durant le vol",
         option = "useTimer",
-        tooltip = "Active/Supprime le la barre de dur\195\169e du trajet.",
+        tooltip = "Active/Supprime le la barre de durée du trajet.",
     };
-
     FLIGHTMAP_OPTIONS[6] = {   -- Option 6: Show flight destinations
-        label = "Show destinations",
+        label = "Afficher les destinations",
         option = "showDestinations",
-        tooltip = "Show flight destinations on tooltips",
+        tooltip = "Afficher les destinations de vol dans les infobulles.",
         children = {7, 8, 9},
     };
     FLIGHTMAP_OPTIONS[7] = {   -- Option 7: Show multi-hop destinations
-        label = "Including multi-hop",
+        label = "Y compris les escales",
         option = "showMultiHop",
-        tooltip = "Show multi-hop destinations on tooltips",
+        tooltip = "Afficher les destinations avec escales dans les infobulles.",
     };
-    FLIGHTMAP_OPTIONS[8] = {   -- Option 8: Show flight times  (TODO translate)
-        label = "With flight times",
+    FLIGHTMAP_OPTIONS[8] = {   -- Option 8: Show flight times
+        label = "Avec les durées de vol",
         option = "showTimes",
-        tooltip = "Show flight times on tooltips.",
+        tooltip = "Afficher les durées de vol dans les infobulles.",
     };
-    FLIGHTMAP_OPTIONS[9] = {   -- Option 9: Show flight costs  (TODO translate)
-        label = "With flight costs",
+    FLIGHTMAP_OPTIONS[9] = {   -- Option 9: Show flight costs
+        label = "Avec les coûts de vol",
         option = "showCosts",
-        tooltip = "Show flight costs on tooltips.",
+        tooltip = "Afficher les coûts de vol dans les infobulles.",
     };
     FLIGHTMAP_OPTIONS[10] = {   -- Option 10: Taxi window extras 
-        label = "Full flight map",
+        label = "Carte de vol complète",
         option = "fullTaxiMap",
-        tooltip = "Show unreachable nodes on the taxi window map",
+        tooltip = "Afficher les nœuds inaccessibles sur la carte de la fenêtre de vol.",
+    };
+    FLIGHTMAP_OPTIONS[11] = {   -- Option 11: Confirm flight destinations
+        label = "Confirmer les vols",
+        option = "confirmFlights",
+        tooltip = "Demander une confirmation avant de prendre un vol.",
+    };
+    FLIGHTMAP_OPTIONS[14] = {   -- Option 14: zone tooltip
+        label = "Afficher l'infobulle de zone",
+        option = "showZoneTooltip",
+        tooltip = "Afficher une infobulle pour la zone sur la carte du continent.",
+	    children = {15},
+    };
+    FLIGHTMAP_OPTIONS[15] = {   -- Option 15: zone level ranges
+        label = "Niveaux de zone",
+        option = "showLevelRanges",
+        tooltip = "Afficher les niveaux recommandés pour chaque zone.",
+    };
+    FLIGHTMAP_OPTIONS[16] = {   -- Option 16: UnitXP notify taskbar
+        label = "Notif. : icône de la barre des tâches",
+        option = "notifyTaskbar",
+        tooltip = "Faire clignoter l'icône de la barre des tâches à l'atterrissage.",
+    };
+    FLIGHTMAP_OPTIONS[17] = {   -- Option 17: UnitXP notify sound
+        label = "Notif. : son système",
+        option = "notifySound",
+        tooltip = "Jouer un son système à l'atterrissage.",
     };
     FLIGHTMAP_OPTIONS[18] = {   -- Option 18: Minimap button
         label = "Bouton de la minicarte",
         option = "showMinimapButton",
         tooltip = "Affiche un bouton FlightMap sur la minicarte.",
     };
-    FLIGHTMAP_OPTIONS[11] = {   -- Option 11: Confirm flight destinations
-        label = "Confirm flights",
-        option = "confirmFlights",
-        tooltip = "Prompt for confirmation before taking a flight",
+    FLIGHTMAP_OPTIONS[19] = {   -- Option 19: Lock flight times
+        label = "Verrouiller les temps de vol",
+        option = "lockFlightTimes",
+        tooltip = "Empêche l'addon d'enregistrer de nouvelles données de vol dans les variables sauvegardées.",
     };
 
-FLIGHTMAP_SHOW_ZONE_TOOLTIP             = "Afficher l'infobulle de zone";
-FLIGHTMAP_SHOW_ZONE_TOOLTIP_TIP         = "Afficher une infobulle pour la zone en survolant la carte du continent.";
-FLIGHTMAP_SHOW_ZONE_LEVEL_RANGES        = "Niveaux de zone";
-FLIGHTMAP_SHOW_ZONE_LEVEL_RANGES_TIP    = "Afficher les niveaux recommand959s pour chaque zone.";
-FLIGHTMAP_TOOLTIP_FONT_SIZE             = "Taille de police de l'infobulle";
-FLIGHTMAP_TOOLTIP_FONT_SIZE_TIP         = "R959gle la taille de police du texte de l'infobulle FlightMap.";
-FLIGHTMAP_MINIMAP_TIP1                  = "Clic gauche pour ouvrir le menu FlightMap.";
-FLIGHTMAP_MINIMAP_TIP2                  = "Maintenir le clic droit pour d\195\169placer le bouton de la minicarte.";
-FLIGHTMAP_MINIMAP_TIP3                  = "Ctrl + clic gauche pour ouvrir la carte des vols.";
+    FLIGHTMAP_TOOLTIP_FONT_SIZE             = "Taille de police de l'infobulle";
+    FLIGHTMAP_TOOLTIP_FONT_SIZE_TIP         = "Règle la taille de police du texte de l'infobulle FlightMap.";
+    FLIGHTMAP_MINIMAP_TIP1                  = "Clic gauche pour ouvrir le menu FlightMap.";
+    FLIGHTMAP_MINIMAP_TIP2                  = "Maintenir le clic droit pour déplacer le bouton de la minicarte.";
+    FLIGHTMAP_MINIMAP_TIP3                  = "Ctrl + clic gauche pour ouvrir la carte des vols.";
+    FLIGHTMAP_MINIMAP_TIP4                  = "Maj + clic gauche pour réinitialiser la position de la barre de minuterie.";
 
--- These constants determine how "Town, Zone" strings look.
+    -- These constants determine how "Town, Zone" strings look.
     -- SEP_STRING is what separates Town from Zone.  SEP_POSTAMBLE
     -- is anything that is after Zone.
     FLIGHTMAP_SEP_STRING    = ", ";
