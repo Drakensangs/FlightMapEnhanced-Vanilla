@@ -13,6 +13,8 @@ Dhask's FlightMap for World of Warcraft 1.12.1 with the following enhancements/c
  - Toggleable minimap button.
  - [**pfUI**](https://github.com/shagu/ShaguTweaks) support.
 
+[**ClassicAPI**](https://github.com/brues-code/ClassicAPI) is recommended if you want to be able to see all the zone entries for The Barrens & Feralas as it removes the 1.12.1 30 line tooltip cap.
+
 ## 👨‍💻 **Authors**
 
 Original addon: Dhask; 
@@ -21,10 +23,10 @@ Enhanced version: Drakensangs
 
 ## 📸 **Screenshots**
 
-<img width="656" height="669" alt="fmmenu" src="https://github.com/user-attachments/assets/a71551db-3345-45bb-a240-7d5424bf4bd3" />
-<img width="1603" height="1068" alt="Untitled1" src="https://github.com/user-attachments/assets/c25ce356-388f-43e6-b429-799bf78797d6" />
+<img width="642" height="643" alt="fmap opts" src="https://github.com/user-attachments/assets/2e4ddf19-b32b-423b-a2d0-1a09f804279f" />
+<img width="1596" height="1065" alt="fmap" src="https://github.com/user-attachments/assets/3e9044a0-2d33-4c41-8945-054295f493fb" />
 <img width="1603" height="1068" alt="Untitled2" src="https://github.com/user-attachments/assets/0cf7b2ff-9ce2-4970-8f4b-1d94b0272299" />
-<img width="1880" height="1256" alt="113" src="https://github.com/user-attachments/assets/78911375-1aa4-4281-94c1-fab789abc265" />
+<img width="1881" height="1251" alt="fmap3" src="https://github.com/user-attachments/assets/7ab67d33-99eb-43c0-b671-92791ef19716" />
 <img width="1603" height="1068" alt="Untitled4" src="https://github.com/user-attachments/assets/40404568-8945-4338-bf11-4c3e7f439d1b" />
-<img width="691" height="671" alt="fmmenupfui" src="https://github.com/user-attachments/assets/2181595b-976b-4c24-98f6-8de94a78a38c" />
+<img width="647" height="653" alt="fmappfui" src="https://github.com/user-attachments/assets/1703ec16-f4b1-48b0-86a6-f31f04f988d0" />
 <img width="537" height="669" alt="fmflightmappfui" src="https://github.com/user-attachments/assets/14f27b89-475d-4b1f-9ae3-ca79722666d0" />
