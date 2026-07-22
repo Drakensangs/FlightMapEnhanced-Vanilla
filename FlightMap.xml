@@ -219,7 +219,6 @@
         </Anchors>
         <Scripts>
           <OnClick>
-            PlaySound("gsTitleOptionOK");
             HideUIPanel(FlightMapOptionsFrame);
           </OnClick>
         </Scripts>

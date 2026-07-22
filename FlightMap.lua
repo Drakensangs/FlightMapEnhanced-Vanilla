@@ -153,22 +153,24 @@ local function lStripDefaults(factionSV, defaults)
                     savedNode.Flights = nil;
                 end
             end
-            -- Strip costs matching default exactly
-            if savedNode.Costs and def.Costs then
-                for dest, svCost in pairs(savedNode.Costs) do
-                    if def.Costs[dest] == svCost then
-                        savedNode.Costs[dest] = nil;
-                    end
-                end
-                if not next(savedNode.Costs) then
-                    savedNode.Costs = nil;
-                end
-            end
             -- If nothing meaningful remains, drop the whole node
             local hasData = false;
             for _ in pairs(savedNode) do hasData = true; break; end
             if not hasData then factionSV[nodeKey] = nil; end
         end
+    end
+end
+
+-- Prune empty cost tables from per-character cost storage.
+local function lStripCharCosts(charFactionSV)
+    if not charFactionSV then return; end
+    for nodeKey, savedNode in pairs(charFactionSV) do
+        if savedNode.Costs and not next(savedNode.Costs) then
+            savedNode.Costs = nil;
+        end
+        local hasData = false;
+        for _ in pairs(savedNode) do hasData = true; break; end
+        if not hasData then charFactionSV[nodeKey] = nil; end
     end
 end
 
@@ -200,6 +202,12 @@ local function lSetDefaultData()
     lStripDefaults(FlightMap[FLIGHTMAP_HORDE],    FLIGHTMAP_HORDE_FLIGHTS);
     lStripDefaults(FlightMap[FLIGHTMAP_ALLIANCE], FLIGHTMAP_ALLIANCE_FLIGHTS);
 
+    -- Prune empty cost tables from per-character cost storage
+    if FlightMapChar then
+        lStripCharCosts(FlightMapChar[FLIGHTMAP_HORDE]);
+        lStripCharCosts(FlightMapChar[FLIGHTMAP_ALLIANCE]);
+    end
+
     -- Rebuild the session map now that overrides are clean
     FlightMapUtil.resetFlightMapCache();
 end
@@ -211,6 +219,7 @@ local function lLearnTaxiNode()
     local map     = FlightMapUtil.getFlightMap();
     local faction = UnitFactionGroup("player");
     local sv      = FlightMapUtil.lGetOverrides(faction);
+    local charSV  = FlightMapUtil.lGetCostOverrides(faction);
     local defaults = (faction == FLIGHTMAP_ALLIANCE)
                      and FLIGHTMAP_ALLIANCE_FLIGHTS
                      or  FLIGHTMAP_HORDE_FLIGHTS;
@@ -319,12 +328,13 @@ local function lLearnTaxiNode()
             local newCost = TaxiNodeCost(v);
             map[thisName].Costs[k] = newCost;
 
-            -- Persist cost only when it differs from default
+            -- Persist cost to the per-character SV only when it differs from
+            -- the built-in default, so characters with no discount write nothing.
             local dfCost = df and df.Costs and df.Costs[k];
             if dfCost ~= newCost then
-                if not sv[thisName]       then sv[thisName]       = {}; end
-                if not sv[thisName].Costs then sv[thisName].Costs = {}; end
-                sv[thisName].Costs[k] = newCost;
+                if not charSV[thisName]       then charSV[thisName]       = {}; end
+                if not charSV[thisName].Costs then charSV[thisName].Costs = {}; end
+                charSV[thisName].Costs[k] = newCost;
             end
 
             local routes = GetNumRoutes(v);
@@ -717,8 +727,9 @@ local function lDrawFlightLines(zoneName)
 end
 
 -- Last drawn info for tooltip
-local lFM_CurrentZone = nil;
-local lFM_CurrentArea = nil;
+local lFM_CurrentZone      = nil;
+local lFM_CurrentArea      = nil;
+local lFM_CurrentContinent = nil;
 local lFM_OldUpdate = function() end;
 
 -- Replacement function to draw all the extra goodies of FlightMap
@@ -726,17 +737,19 @@ function FlightMap_WorldMapButton_OnUpdate(arg1)
     lFM_OldUpdate(arg1);
     local areaName = WorldMapFrame.areaName;
     local zoneNum = GetCurrentMapZone();
+    local continentNum = GetCurrentMapContinent();
 
     if FLIGHTMAP_SUBZONES[areaName] then
         areaName = FLIGHTMAP_SUBZONES[areaName];
     end
 
-    if zoneNum == lFM_CurrentZone and areaName == lFM_CurrentArea then
+    if zoneNum == lFM_CurrentZone and areaName == lFM_CurrentArea and continentNum == lFM_CurrentContinent then
         return;
     end
 
-    lFM_CurrentZone = zoneNum;
-    lFM_CurrentArea = areaName;
+    lFM_CurrentZone      = zoneNum;
+    lFM_CurrentArea      = areaName;
+    lFM_CurrentContinent = continentNum;
 
     if zoneNum == 0 then
         lUpdateTooltip(areaName);
@@ -786,8 +799,10 @@ function FlightMap_OnSlashCmd(args)
             FLIGHTMAP_TIMESLOCKED[FlightMapChar.Opts.lockFlightTimes],
             1.0, 1.0, 1.0);
     elseif (FlightMapOptionsFrame:IsVisible()) then
+		PlaySound("igMainMenuOption")
         HideUIPanel(FlightMapOptionsFrame);
     else
+		PlaySound("igMainMenuOpen")
         ShowUIPanel(FlightMapOptionsFrame);
     end
 end
@@ -984,6 +999,7 @@ function FlightMapOptionsFrame_OnShow()
 end
 
 function FlightMapOptionsFrame_OnHide()
+	PlaySound("igMainMenuOption")
     if (MYADDONS_ACTIVE_OPTIONSFRAME == this) then
         ShowUIPanel(myAddOnsFrame);
     end
@@ -1116,8 +1132,10 @@ function FlightMapMinimapButton_OnMouseUp(button)
             FlightMapTaxi_ShowContinent();
         else
             if FlightMapOptionsFrame:IsVisible() then
+				PlaySound("igMainMenuOption")
                 HideUIPanel(FlightMapOptionsFrame);
             else
+				PlaySound("igMainMenuOpen")
                 ShowUIPanel(FlightMapOptionsFrame);
             end
         end

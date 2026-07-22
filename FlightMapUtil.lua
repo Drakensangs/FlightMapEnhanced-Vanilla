@@ -51,6 +51,15 @@ FlightMapUtil.lGetOverrides = function(faction)
     return FlightMap[faction];
 end
 
+-- Return the per-character, per-faction cost override table,
+-- creating it if necessary.  Costs live here so that per-character
+-- reputation/rank discounts are isolated from the shared flight data.
+FlightMapUtil.lGetCostOverrides = function(faction)
+    if not FlightMapChar then FlightMapChar = {}; end
+    if not FlightMapChar[faction] then FlightMapChar[faction] = {}; end
+    return FlightMapChar[faction];
+end
+
 -- Build and cache the session flight map for the current character's
 -- faction.  The session map starts as a deep copy of the faction
 -- defaults, then any saved overrides (new nodes or differing values)
@@ -87,6 +96,22 @@ FlightMapUtil.getFlightMap = function()
                     else
                         map[k][field] = val;
                     end
+                end
+            end
+        end
+    end
+
+    -- Merge per-character cost overrides (reputation/rank discounts vary
+    -- per character, so costs are stored in FlightMapChar rather than the
+    -- shared FlightMap global).
+    local charCosts = FlightMapChar and FlightMapChar[faction];
+    if charCosts then
+        for k, nodeOverride in pairs(charCosts) do
+            if nodeOverride.Costs then
+                if not map[k] then map[k] = {}; end
+                if not map[k].Costs then map[k].Costs = {}; end
+                for dest, cost in pairs(nodeOverride.Costs) do
+                    map[k].Costs[dest] = cost;
                 end
             end
         end
