@@ -1335,6 +1335,8 @@ function FlightMap_FixMagnifyCartographerAnchor(tooltip)
 
     local worldMapWindowEnabled = shaguTweaksActive and ShaguTweaks_config
             and ShaguTweaks_config["WorldMap Window"] == 1;
+			
+	local pfUIActive = IsAddOnLoaded("pfUI");
 
     local OFFSET_X, OFFSET_Y;
     if cartographerActive and lookNFeelActive then
@@ -1343,6 +1345,9 @@ function FlightMap_FixMagnifyCartographerAnchor(tooltip)
     elseif cartographerActive then
         OFFSET_X = 181;
         OFFSET_Y = 31;
+	elseif pfUIActive then
+		OFFSET_X = 7;
+		OFFSET_Y = 8;
     elseif shaguTweaksActive and not worldMapWindowEnabled then
         OFFSET_X = 181;
         OFFSET_Y = 31;
